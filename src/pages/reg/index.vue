@@ -1,31 +1,29 @@
 <template lang="pug">
-.g-login
-  .g-login-box
-    .login-info
+.g-reg
+  .g-reg-box
+    .reg-info
       .hznu-logo
-      .hznu-title 杭州师范大学云表单
-        .sub-title HZNU FORM
-          sup +
-        .sub-title 没有账号？
-          span.reg-ref(@click="goReg") 去注册
-      el-form(:model="loginForm", :rules="rules", ref="loginForm", label-position="left", label-width="0px")
-        el-form-item(prop="account")
-          el-input(type="text", v-model="loginForm.account" class="login-box-input")
-            template(slot="prefix") 账号
-        el-form-item.login-box-pwd(prop="checkPass")
-          el-input(type="password", v-model="loginForm.checkPass", class="login-box-input")
+      .hznu-title 注册
+      span.reg-tip 已有账号？
+      span.reg-ref(@click="goLogin") 登录
+      el-form(:model="regForm", :rules="rules", ref="regForm", label-position="left", label-width="0px")
+        el-form-item(prop="name")
+          el-input(type="text", v-model="regForm.name" class="reg-box-input")
+            template(slot="prefix") 昵称
+        el-form-item(prop="phone")
+          el-input(type="text", v-model="regForm.phone" class="reg-box-input")
+            template(slot="prefix") 手机
+        el-form-item.reg-box-pwd(prop="checkPass")
+          el-input(type="password", v-model="regForm.checkPass", class="reg-box-input")
             template(slot="prefix") 密码
-        el-form-item(class="login-box-checkbox")
-          el-checkbox(v-model="loginForm.remember", checked, class="remember") 下次自动登录
-          span.err-tip(v-if="showError", class="login-box-error") 账号或密码错误
-        el-form-item(class="login-box-submit")
+        el-form-item(class="reg-box-submit")
           el-button(
             type="primary"
-            :loading="logining"
+            :loading="reging"
             :disabled="submitDisabled"
             size="small"
-            @click.native.prevent="handleSubmit") 登录
-    .login-bg
+            @click.native.prevent="handleSubmit") 注册
+    .reg-bg
 </template>
 
 <script>
@@ -34,18 +32,21 @@ import request from '@/utils/request'
 export default {
   data () {
     return {
-      logining: false,
+      reging: false,
       showError: false,
-      loginForm: {
-        account: '',
+      regForm: {
+        name: '',
         checkPass: '',
-        remember: true
+        phone: ''
       },
       rules: {
-        account: [
+        phone: [
           { required: true, message: ' ', trigger: 'blur' }
         ],
         checkPass: [
+          { required: true, message: ' ', trigger: 'blur' }
+        ],
+        name: [
           { required: true, message: ' ', trigger: 'blur' }
         ]
       }
@@ -53,21 +54,21 @@ export default {
   },
    computed: {
     submitDisabled () {
-      return this.loginForm.account === '' || this.loginForm.checkPass === ''
+      return this.regForm.account === '' || this.regForm.checkPass === ''
     }
   },
   mounted () {
     console.log(this.$route, this.$router)
   },
   methods: {
-    goReg () {
-      this.$router.push({ name: 'reg' })
+    goLogin () {
+      this.$router.push({ name: 'login' })
     },
     handleSubmit (e) {
       request
         .post('http://127.0.0.1:3000/users/login', {
-          phone: this.loginForm.account,
-          password: this.loginForm.checkPass
+          phone: this.regForm.account,
+          password: this.regForm.checkPass
         })
         .then(res => {
           console.log('这里处理回应')
@@ -81,7 +82,7 @@ export default {
 </script>
 
 <style lang="scss">
-.g-login {
+.g-reg {
   height: 100%;
   box-sizing: border-box;
   padding: 30px 50px;
@@ -100,13 +101,13 @@ export default {
     box-shadow:0 16px 34px 0 rgba(199,199,199,0.56);
     border-radius:10px;
     display: flex;
-    .login-info,
-    .login-bg {
+    .reg-info,
+    .reg-bg {
       width: 50%;
       height: 100%;
       box-sizing: border-box;
     }
-    .login-info {
+    .reg-info {
       padding: 30px 50px 0 50px;
       .hznu-logo {
         width: 70px;
@@ -114,9 +115,18 @@ export default {
         background: url("~@/assets/image/hznulogo.png");
         background-size: 100% 100%;
       }
+      .reg-tip {
+        font-size: 12px;
+        color: #777;
+      }
+      .reg-ref {
+        font-size: 12px;
+        color: #478cff;
+        cursor: pointer;
+      }
       .hznu-title {
         margin-top: 54px;
-        margin-bottom: 50px;
+        margin-bottom: 5px;
         font-size: 16px;
         font-weight: bold;
         color: #171c20;
@@ -127,10 +137,9 @@ export default {
           font-weight: normal;
           margin-top: 10px;
         }
-        .reg-ref {
-          cursor: pointer;
-          color: #478cff;
-        }
+      }
+      .el-form {
+        margin-top: 25px;
       }
       .el-input {
         &__inner {
@@ -144,10 +153,10 @@ export default {
           background-color: transparent;
         }
       }
-      .login-box-pwd {
+      .reg-box-pwd {
         margin-bottom: 5px;
       }
-      .login-box-checkbox {
+      .reg-box-checkbox {
         margin-bottom: 50px;
         .err-tip {
           font-size: 12px;
@@ -161,10 +170,11 @@ export default {
           }
         }
       }
-      .login-box-submit {
+      .reg-box-submit {
         .el-button {
           width: 188px;
           height: 44px;
+          margin-top: 25px;
           border-radius: 6px;
           line-height: 44px;
           padding: 0;
@@ -179,7 +189,7 @@ export default {
         }
       }
     }
-    .login-bg {
+    .reg-bg {
       border-radius: 0 10px 10px 0;
       background: url("~@/assets/image/hznu01.jpg");
       background-position: 60%;

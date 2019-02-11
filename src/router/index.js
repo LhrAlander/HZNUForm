@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+
 const Login = () => import('@/pages/login')
+const Reg = () => import('@/pages/reg')
 
 Vue.use(Router)
 
@@ -13,6 +15,15 @@ export const publicRouters = [
   {
     path: '/login',
     name: 'login',
+    component: Login
+  },
+  {
+    path: '/reg',
+    name: 'reg',
+    component: Reg
+  },
+  {
+    path: '/test',
     component: Login
   },
   {
