@@ -25,48 +25,15 @@ export default {
       structs: [
         {
           label: '杭州国际服务工程学院',
-          color: colors[0],
-          children: [
-            {
-              label: '计算机'
-            },
-            {
-              label: '软件工程'
-            },
-            {
-              label: '物联网'
-            }
-          ]
+          color: colors[0]
         },
         {
           label: '阿里巴巴商学院',
-          color: colors[3],
-          children: [
-            {
-              label: '物流管理'
-            },
-            {
-              label: '电子商务'
-            }
-          ]
+          color: colors[3]
         },
         {
           label: '理学院',
-          color: colors[7],
-          children: [
-            {
-              label: '应用统计学'
-            },
-            {
-              label: '物理学'
-            },
-            {
-              label: '地理信息科学'
-            },
-            {
-              label: '信息与计算科学'
-            }
-          ]
+          color: colors[7]
         },
         {
           label: '后勤部门',

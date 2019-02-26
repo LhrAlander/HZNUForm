@@ -5,7 +5,7 @@
     overview(
       v-if="step === 'overview'"
       @viewMember="viewMember")
-    members(v-if="step === 'members'")
+    members(v-if="step === 'members'" @goback='goOverview')
 </template>
 
 <script>
@@ -27,6 +27,9 @@ export default {
   methods: {
     viewMember (structId) {
       this.step = 'members'
+    },
+    goOverview () {
+      this.step = 'overview'
     }
   }
 }

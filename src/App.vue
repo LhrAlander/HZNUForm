@@ -14,6 +14,8 @@ export default {
 html,
 body {
   height: 100%;
+  min-width: 1600px;
+  min-height: 800px;
 }
 #app {
   height: 100%;
