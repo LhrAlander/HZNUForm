@@ -15,48 +15,55 @@
         |调整顺序
     .editapp-aside-list
       el-collapse
-        el-collapse-item.editapp-aside-item(
-          v-if="group.groupId !== -1"
-          v-for="group in groups"
-          :key="group.groupId")
-          template(slot="title")
-            i.iconfont.icon-wenjianjia
-            |{{ group.name }}
-          .editapp-group-operate
-            .editapp-group-rename(@click="handleRenameGroup(group)")
-              i.el-icon-edit
-              |修改名称
-            .editapp-group-delete(@click="handleDeleteGroup(group)")
-              i.el-icon-delete
-              |删除分组
-          .editapp-group-form(
-            v-for="form in group.forms"
-            :key="form.formId"
-            @click="viewForm(form)")
-            i.iconfont.icon-biaodan(v-if="form.type === 1")
-            i.iconfont.icon-baobiao(v-else)
-            |{{ form.formName }}
-            i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
-            i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
-      .editapp-ungroup-form(
-        v-for="form in unGroupForms"
-        :key="form.formId"
-        @click="viewForm(form)")
-        i.iconfont.icon-biaodan(v-if="form.type === 1")
-        i.iconfont.icon-baobiao(v-else)
-        |{{ form.formName }}
-        i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
-        i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
+        draggable(v-model="groups"  @start="drag=true" @end="drag=false" :options="{ group:'group' }")
+          el-collapse-item.editapp-aside-item(
+            v-if="group.groupId !== -1"
+            v-for="group in groups"
+            :key="group.groupId")
+            template(slot="title")
+              i.iconfont.icon-wenjianjia
+              |{{ group.name }}
+            .editapp-group-operate
+              .editapp-group-rename(@click="handleRenameGroup(group)")
+                i.el-icon-edit
+                |修改名称
+              .editapp-group-delete(@click="handleDeleteGroup(group)")
+                i.el-icon-delete
+                |删除分组
+            draggable(v-model="group.forms"  @start="drag=true" @end="drag=false" :options="{ group:'forms' }")
+              .editapp-group-form(
+                v-for="form in group.forms"
+                :key="form.formId"
+                @click="viewForm(form)")
+                i.iconfont.icon-biaodan(v-if="form.type === 1")
+                i.iconfont.icon-baobiao(v-else)
+                |{{ form.formName }}
+                i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
+                i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
+      draggable(v-model="unGroupForms"  @start="drag=true" @end="drag=false" :options="{ group:'forms' }")
+        .editapp-ungroup-form(
+          v-for="form in unGroupForms"
+          :key="form.formId"
+          @click="viewForm(form)")
+          i.iconfont.icon-biaodan(v-if="form.type === 1")
+          i.iconfont.icon-baobiao(v-else)
+          |{{ form.formName }}
+          i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
+          i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
 </template>
 
 <script>
+import draggable from 'vuedraggable'
 export default {
+  components: {
+    draggable
+  },
   data () {
     return {
       groups: [
         {
           groupId: 1,
-          name: '项目计划&任务填写',
+          name: '项目计划&任务填写1',
           forms: [
             {
               type: 1,
@@ -71,6 +78,27 @@ export default {
             {
               type: 1,
               formId: 103,
+              formName: '3.项目任务安排'
+            }
+          ]
+        },
+        {
+          groupId: 2,
+          name: '项目计划&任务填写',
+          forms: [
+            {
+              type: 1,
+              formId: 301,
+              formName: '1.立项'
+            },
+            {
+              type: 2,
+              formId: 302,
+              formName: '2.项目计划安排'
+            },
+            {
+              type: 1,
+              formId: 303,
               formName: '3.项目任务安排'
             }
           ]
@@ -94,8 +122,14 @@ export default {
     }
   },
   computed: {
-    unGroupForms () {
-      return this.groups.filter(_ => _.groupId === -1)[0].forms
+    unGroupForms: {
+      get () {
+        return this.groups.filter(_ => _.groupId === -1)[0].forms
+      },
+      set (v) {
+        console.log(v)
+        this.groups.filter(_ => _.groupId === -1)[0].forms = v
+      }
     }
   },
   methods: {
