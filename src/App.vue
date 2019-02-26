@@ -11,6 +11,7 @@ export default {
 
 <style lang="scss">
 @import "~normalize.css";
+@import "./assets/fonts/iconfont.css";
 html,
 body {
   height: 100%;
