@@ -2,12 +2,12 @@
 .apps
   f-header
   .apps-wrapper
-    .app-item(v-for="app in apps" :key="app.id" :data-name="app.name")
+    .app-item(v-for="app in apps" :key="app.id" :data-name="app.name" @click="goApp(app)")
       .app-item-bar(:style="{ background: app.color }")
       .app-item-icon
         i.iconfont(:class="'icon-app' + app.icon" :style="{ color: app.color }")
       .app-item-set
-        i.el-icon-delete(@click="handleDelApp(app)")
+        i.el-icon-delete(@click.stop="handleDelApp(app)")
         el-popover(
           popper-class="app-style-set"
           width="280"
@@ -17,8 +17,8 @@
           .app-item-styleicon
             .app-icon-item(v-for="iconIndex in 10" :key="iconIndex" :style="{ background: app.color }" @click="changeIcon(app, iconIndex)")
               i.iconfont(:class="'icon-app'+iconIndex")
-          i.iconfont.icon-shezhi(slot="reference")
-        i.iconfont.icon-fuzhi(title="复制应用" @click="handleCopyApp(app)")
+          i.iconfont.icon-shezhi(slot="reference" @click.stop="")
+        i.iconfont.icon-fuzhi(title="复制应用" @click.stop="handleCopyApp(app)")
         el-popover(
           trigger="click"
           popper-class="app-name-set"
@@ -28,7 +28,7 @@
           //- .btn-group
           //-   el-button(@click="app.nameVisible = false") 取消
           //-   el-button(type="primary" @click="app.nameVisible = false") 确定
-          i.el-icon-edit(slot="reference" title="修改名称" @click="app.nameVisible = true")
+          i.el-icon-edit(slot="reference" title="修改名称" @click.stop="app.nameVisible = true")
 </template>
 
 <script>
@@ -95,6 +95,9 @@ export default {
         .catch(() => {
           this.$message('取消删除')
         })
+    },
+    goApp (app) {
+      this.$router.push({ name: 'editApp', params: { id: app.id } })
     }
   }
 }

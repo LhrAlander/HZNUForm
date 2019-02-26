@@ -5,6 +5,7 @@ const Login = () => import('@/pages/login')
 const Reg = () => import('@/pages/reg')
 const Contact = () => import('@/pages/contact')
 const App = () => import('@/pages/app')
+const EditApp = () => import('@/pages/app/editApp')
 
 Vue.use(Router)
 
@@ -33,6 +34,11 @@ export const publicRouters = [
     path: '/app',
     name: 'app',
     component: App
+  },
+  {
+    path: '/edit/app/:id',
+    name: 'editApp',
+    component: EditApp
   },
   {
     path: '*',
