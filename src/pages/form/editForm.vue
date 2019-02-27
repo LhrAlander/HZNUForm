@@ -37,7 +37,6 @@
 import {
   INPUT,
   TEXTAREA,
-  NUMBER,
   RADIO,
   CHECKBOX,
   SELECT,
@@ -67,11 +66,11 @@ export default {
           id: TEXTAREA,
           icon: 'wenben'
         },
-        {
-          label: '数字',
-          id: NUMBER,
-          icon: 'shuzi'
-        },
+        // {
+        //   label: '数字',
+        //   id: NUMBER,
+        //   icon: 'shuzi'
+        // },
         {
           label: '单选按钮',
           id: RADIO,
@@ -161,9 +160,30 @@ export default {
             type: _.id,
             id: +new Date()
           }
+          this.initFormItem(_)
           delete _.icon
         }
       })
+    },
+    // 初始化添加控件的时候初始化该控件属性
+    initFormItem (item) {
+      let whiteList = [INPUT, TEXTAREA]
+      let widget = item.widget
+      if (whiteList.includes(widget.type)) return
+      widget.items = [
+        {
+          label: '选项1',
+          value: '选项1'
+        },
+        {
+          label: '选项1',
+          value: '选项1'
+        },
+        {
+          label: '选项1',
+          value: '选项1'
+        }
+      ]
     },
     changeFormItemOrder (e) {
       this.formData.forEach((_, i) => {

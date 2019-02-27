@@ -2,11 +2,8 @@
 .editform-widget-item
   .editform-widget-item-label {{ info.label }}
   .editform-widget-item-desc(v-if="info.desc") {{ info.desc }}
-  .widget-radio
-    .widget-radio-item(v-for="item in info.widget.items" :key="item.value")
-      i.radio-item-circle(v-if="info.widget.type === 4")
-      i.radio-item-square(v-else-if="info.widget.type === 5")
-      span.radio-item-label {{ item.label }}
+  .widget-date
+    el-date-picker(disabled placeholder="选择日期")
 </template>
 
 <script>

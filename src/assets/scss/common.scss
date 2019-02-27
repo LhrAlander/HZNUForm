@@ -33,4 +33,36 @@
       cursor: default;
     }
   }
+  .widget-radio {
+    &-item {
+      display: flex;
+      line-height: 24px;
+      align-items: center;
+      .radio-item-circle,
+      .radio-item-square {
+        width: 14px;
+        height: 14px;
+        display: inline-block;
+        border-radius: 7px;
+        border: 1px solid #91A1B7;
+      }
+      .radio-item-square {
+        border-radius: 2px;
+      }
+      .radio-item-label {
+        font-size: 14px;
+        color: #333;
+        margin-left: 5px;
+      }
+    }
+  }
+  .widget-select,
+  .widget-date {
+    width: 330px;
+    height: 40px;
+    .el-select,
+    .el-input {
+      width: 100%;
+    }
+  }
 }
