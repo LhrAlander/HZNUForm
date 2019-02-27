@@ -29,7 +29,10 @@
       form-item(
         v-for="(formItem, index) in formData"
         :key="index"
-        :info="formItem")
+        :info="formItem"
+        :class="{ selected: formItem.widget && currentSelect === formItem.widget.id }"
+        @selected="handleSelectFormItem"
+        @delete="handleDeleteFormItem")
   .editform-param
 </template>
 
@@ -121,7 +124,8 @@ export default {
       },
       formItemDragOp: {
         group: 'widget'
-      }
+      },
+      currentSelect: -1
     }
   },
   methods: {
@@ -176,12 +180,12 @@ export default {
           value: '选项1'
         },
         {
-          label: '选项1',
-          value: '选项1'
+          label: '选项2',
+          value: '选项2'
         },
         {
-          label: '选项1',
-          value: '选项1'
+          label: '选项3',
+          value: '选项3'
         }
       ]
       if (widget.type === PHONE) {
@@ -195,6 +199,11 @@ export default {
       this.formData.forEach((_, i) => {
         _.index = i
       })
+    },
+    handleSelectFormItem (formItem) {
+      this.currentSelect = formItem.widget.id
+    },
+    handleDeleteFormItem (formItem) {
     }
   }
 }
