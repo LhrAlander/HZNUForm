@@ -12,11 +12,16 @@ export default {
 <style lang="scss">
 @import "~normalize.css";
 @import "./assets/fonts/iconfont.css";
+@import "./assets/scss/common.scss";
+* {
+  box-sizing: border-box;
+}
 html,
 body {
   height: 100%;
   min-width: 1600px;
   min-height: 800px;
+  font-family: "Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
 #app {
   height: 100%;

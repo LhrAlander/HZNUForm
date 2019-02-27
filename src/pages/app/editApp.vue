@@ -55,7 +55,7 @@
           i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
   .editapp-content
     .editapp-add-wrapper
-      .editapp-add-form
+      .editapp-add-form(@click="handleCreateForm")
         .editapp-add-icon.new-form
         .editapp-add-title 新建表单
         .editapp-add-message 表单可用来搜集数据，适合进行数据上报
@@ -251,6 +251,9 @@ export default {
     },
     handleSaveOrder () {
       this.changeOrder = false
+    },
+    handleCreateForm () {
+      this.$router.push({ name: 'editForm', params: { appId: 1, formId: 2 } })
     }
   }
 }
