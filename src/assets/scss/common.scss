@@ -1,6 +1,10 @@
 .editform-widget-item {
   padding: 2px 6px;
   cursor: default;
+  .el-select .el-input.is-disabled .el-input__inner,
+  .el-input.is-disabled .el-input__inner {
+    cursor: default;
+}
   &-label {
     padding: 5px 0;
     line-height: 20px;
@@ -63,6 +67,29 @@
     .el-select,
     .el-input {
       width: 100%;
+      cursor: default;
+    }
+  }
+  .widget-address {
+    width: 720px;
+    &-select {
+      display: flex;
+      .address-select-item {
+        .el-select {
+          width: 100%;
+        }
+        &.province {
+          width: 310px;
+        }
+        &.city,
+        &.town {
+          width: 200px;
+          margin-left: 5px;
+        }
+      }
+    }
+    &-detail {
+      margin-top: 5px;
     }
   }
 }

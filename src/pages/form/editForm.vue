@@ -184,6 +184,12 @@ export default {
           value: '选项1'
         }
       ]
+      if (widget.type === PHONE) {
+        widget.validator = /^(?:\+?86)?1(?:3\d{3}|5[^4\D]\d{2}|8\d{3}|7(?:[35678]\d{2}|4(?:0\d|1[0-2]|9\d))|9[189]\d{2}|66\d{2})\d{6}$/
+      }
+      if (widget.type === EMAIL) {
+        widget.validator = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+      }
     },
     changeFormItemOrder (e) {
       this.formData.forEach((_, i) => {
