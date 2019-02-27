@@ -7,15 +7,18 @@
         span.app-name 测试
   .editapp-aside
     .editapp-aside-operate
-      .editapp-aside-addgroup(@click="handleAddGroup")
+      .editapp-aside-addgroup(v-if="!changeOrder" @click="handleAddGroup")
         i.iconfont.icon-xinjianfenzu
         |新建分组
-      .editapp-aside-changeorder
+      .editapp-aside-changeorder(v-if="!changeOrder" @click="changeOrder=true")
         i.iconfont.icon-tiaozhengshunxu
         |调整顺序
+      .editapp-aside-saveorder(v-if="changeOrder" @click="handleSaveOrder")
+        i.el-icon-check
+        |完成调整
     .editapp-aside-list
       el-collapse
-        draggable(v-model="groups"  @start="drag=true" @end="drag=false" :options="{ group:'group' }")
+        draggable(v-model="groups"  @start="drag=true" @end="drag=false" :options="{ group:'group', disabled: !changeOrder }")
           el-collapse-item.editapp-aside-item(
             v-if="group.groupId !== -1"
             v-for="group in groups"
@@ -30,7 +33,7 @@
               .editapp-group-delete(@click="handleDeleteGroup(group)")
                 i.el-icon-delete
                 |删除分组
-            draggable(v-model="group.forms"  @start="drag=true" @end="drag=false" :options="{ group:'forms' }")
+            draggable(v-model="group.forms"  @start="drag=true" @end="drag=false" :options="{ group:'forms', disabled: !changeOrder }")
               .editapp-group-form(
                 v-for="form in group.forms"
                 :key="form.formId"
@@ -40,7 +43,7 @@
                 |{{ form.formName }}
                 i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
                 i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
-      draggable(v-model="unGroupForms"  @start="drag=true" @end="drag=false" :options="{ group:'forms' }")
+      draggable(v-model="unGroupForms"  @start="drag=true" @end="drag=false" :options="{ group:'forms', disabled: !changeOrder }")
         .editapp-ungroup-form(
           v-for="form in unGroupForms"
           :key="form.formId"
@@ -50,6 +53,18 @@
           |{{ form.formName }}
           i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
           i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
+  .editapp-content
+    .editapp-add-wrapper
+      .editapp-add-form
+        .editapp-add-icon.new-form
+        .editapp-add-title 新建表单
+        .editapp-add-message 表单可用来搜集数据，适合进行数据上报
+      .editapp-add-report
+        .editapp-add-icon.new-report
+        .editapp-add-title 新建报表
+        .editapp-add-message 报表适合用来进行数据汇总、结果展示，趋势分析等
+    //- .editapp-set
+    //-   el-button(type="primary" plain) 应用设置
 </template>
 
 <script>
@@ -118,7 +133,8 @@ export default {
             }
           ]
         }
-      ]
+      ],
+      changeOrder: false
     }
   },
   computed: {
@@ -232,6 +248,9 @@ export default {
           message: '取消新建'
         })
       })
+    },
+    handleSaveOrder () {
+      this.changeOrder = false
     }
   }
 }
@@ -240,6 +259,7 @@ export default {
 <style lang="scss">
 .editapp {
   height: 100%;
+  position: relative;
   &-head {
     height: 60px;
     line-height: 60px;
@@ -261,6 +281,7 @@ export default {
   &-aside {
     width: 280px;
     position: relative;
+    display: inline-block;
     z-index: 2;
     min-height: calc( 100% - 60px);
     background: #fff;
@@ -286,6 +307,25 @@ export default {
       }
       &:hover {
         color: #178cdf;
+      }
+    }
+    &-saveorder {
+      height: 40px;
+      width: 100%;
+      line-height: 40px;
+      text-align: center;
+      color: #333;
+      cursor: pointer;
+      .el-icon-check {
+        color: #178cdf;
+        margin-right: 10px;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 1px solid #178cdf;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 18px;
       }
     }
     &-addgroup::after {
@@ -373,6 +413,65 @@ export default {
       }
       .el-icon-delete {
         right: 20px;
+      }
+    }
+  }
+  &-content {
+    position: absolute;
+    background: #fff;
+    left: 280px;
+    right: 0;
+    top: 60px;
+    bottom: 0;
+    .editapp-add-wrapper {
+      margin: 40px auto;
+      text-align: center;
+      .editapp-add-form,
+      .editapp-add-report {
+        width: 220px;
+        height: 260px;
+        margin: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        background: #F8FAF9;
+        cursor: pointer;
+      }
+      .editapp-add-icon {
+        margin: 60px auto 30px;
+        width: 56px;
+        height: 68px;
+        background-repeat: no-repeat;
+        background: url("~@/assets/image/createIcons.png");
+        background-size: 56px 272px;
+        &.new-form {
+          background-position: 0 0;
+        }
+        &.new-report {
+          background-position: 0 -136px;
+        }
+      }
+      .editapp-add-title {
+        margin: 40px 0 15px;
+        font-size: 16px;
+      }
+      .editapp-add-message {
+        padding: 0 20px;
+        font-size: 12px;
+        color: #989898;
+        text-align: left;
+      }
+    }
+    .editapp-set {
+      max-width: 840px;
+      border-top: solid 1px #ECECEC;
+      margin: auto;
+      text-align: center;
+      .el-button {
+        margin-top: 60px;
+        line-height: 45px;
+        width: 150px;
+        font-size: 16px;
+        padding: 0;
       }
     }
   }
