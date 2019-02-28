@@ -194,7 +194,7 @@ export default {
     },
     // 初始化添加控件的时候初始化该控件属性
     initFormItem (item) {
-      let whiteList = [INPUT, TEXTAREA]
+      let whiteList = [INPUT, TEXTAREA, EMAIL, PHONE, DATE]
       let widget = item.widget
       if (whiteList.includes(widget.type)) return
       // this.$set(widget, 'items', [])
@@ -251,6 +251,8 @@ export default {
     goView () {
       let formData = JSON.stringify(this.formData)
       localStorage.setItem('viewForm', formData)
+      const { href } = this.$router.resolve({ name: 'viewForm' })
+      window.open(href, '_blank')
     }
   }
 }

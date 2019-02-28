@@ -7,6 +7,7 @@ const Contact = () => import('@/pages/contact')
 const App = () => import('@/pages/app')
 const EditApp = () => import('@/pages/app/editApp')
 const EditForm = () => import('@/pages/form/editForm')
+const ViewForm = () => import('@/pages/form/viewForm')
 
 Vue.use(Router)
 
@@ -45,6 +46,11 @@ export const publicRouters = [
     path: '/edit/form/:appId/:formId',
     name: 'editForm',
     component: EditForm
+  },
+  {
+    path: '/view/form',
+    name: 'viewForm',
+    component: ViewForm
   },
   {
     path: '*',
