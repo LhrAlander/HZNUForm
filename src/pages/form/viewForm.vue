@@ -36,14 +36,20 @@
           .widget-address(v-if="item.widget.type === 8")
             .widget-address-select
               .address-select-item.province
-                el-select(placeholder="省/自治区/直辖市" v-model="item.widget.answer.value.province" @change="clearAddress(item.widget.answer.value, 1)")
+                el-select(
+                  placeholder="省/自治区/直辖市"
+                  v-model="item.widget.answer.value.province"
+                  @change="clearAddress(item.widget.answer.value, 1)")
                   el-option(
                     v-for="(province, index) in provinces"
                     :key="index"
                     :label="province.label"
                     :value="province.value")
               .address-select-item.city
-                el-select(placeholder="市" v-model="item.widget.answer.value.city" @change="clearAddress(item.widget.answer.value, 2)")
+                el-select(
+                  placeholder="市"
+                  v-model="item.widget.answer.value.city"
+                  @change="clearAddress(item.widget.answer.value, 2)")
                   el-option(
                     v-for="(city, index) in getCities(item.widget.answer.value.province)"
                     :key="index"

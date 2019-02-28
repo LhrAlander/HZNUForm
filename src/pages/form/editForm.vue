@@ -31,7 +31,7 @@
       .save-form
         el-button.save-btn(type="primary") 保存
       .publish-form
-        el-button.publish-btn(type="success") 发布
+        el-button.publish-btn(type="success" @click="publishVisiable=true") 发布
     draggable.editform-form-content(v-model="formData" :options="formItemDragOp" @end="changeFormItemOrder")
       form-item(
         v-for="(formItem, index) in formData"
@@ -43,6 +43,27 @@
   .editform-param
     .editform-param-title 字段属性
     widget-set(:info="selectedWidget" @changeParams="setWidget")
+  el-dialog(
+    title="发布"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :visible.sync="publishVisiable"
+    :before-close="handleClosePublish"
+    width="500px")
+    el-tree(
+      :data="structs"
+      show-checkbox
+      node-key="label"
+      ref="structTree"
+    )
+    .end-time
+      el-date-picker(
+        v-model="endTime"
+        type="date"
+        placeholder="选择截止日期")
+    .contact-struct-btns
+      el-button.change-struct-btn(type="info" @click="handleCancelPublish") 取消
+      el-button.change-struct-btn(type="primary" @click="handleConfirmPublish") 确定
 </template>
 
 <script>
@@ -140,7 +161,15 @@ export default {
       formItemDragOp: {
         group: 'widget'
       },
-      currentSelect: -1
+      currentSelect: -1,
+      publishVisiable: false,
+      structs: [
+        { label: '杭州国际服务工程学院' }, { label: '阿里巴巴商学院' }, { label: '理学院' }, { label: '后勤部门' }, { label: '教务处' },
+        { label: '杭州国际服务工程学院2' }, { label: '阿里巴巴商学院2' }, { label: '理学院2' }, { label: '后勤部门2' }, { label: '教务处2' },
+        { label: '杭州国际服务工程学院3' }, { label: '阿里巴巴商学院3' }, { label: '理学院3' }, { label: '后勤部门3' }, { label: '教务处3' },
+        { label: '杭州国际服务工程学院4' }, { label: '阿里巴巴商学院4' }, { label: '理学院4' }, { label: '后勤部门4' }, { label: '教务处4' }
+      ],
+      endTime: ''
     }
   },
   computed: {
@@ -253,6 +282,31 @@ export default {
       localStorage.setItem('viewForm', formData)
       const { href } = this.$router.resolve({ name: 'viewForm' })
       window.open(href, '_blank')
+    },
+    handleClosePublish (done) {
+      let el = this.$refs.structTree
+      let structs = el.getCheckedKeys()
+      el.setCheckedNodes(structs)
+      done()
+      this.endTime = ''
+    },
+    handleCancelPublish () {
+      let el = this.$refs.structTree
+      let structs = el.getCheckedKeys()
+      el.setCheckedNodes(structs)
+      this.publishVisiable = false
+      this.endTime = ''
+    },
+    handleConfirmPublish () {
+      let el = this.$refs.structTree
+      let structs = el.getCheckedKeys()
+      el.setCheckedNodes(structs)
+      this.publishVisiable = false
+      this.endTime = ''
+      this.$message({
+        message: '发布成功',
+        type: 'success'
+      })
     }
   }
 }
@@ -396,6 +450,49 @@ export default {
         border-bottom: 1px dashed #4388de;
       }
     }
+  }
+  .el-dialog {
+    border-radius: 10px;
+    &__header {
+      height:49px;
+      padding: 0 14px;
+      line-height: 49px;
+      background:#2d353c;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    &__title {
+      color: #fff;
+      font-size:16px;
+    }
+    &__headerbtn {
+      width:26px;
+      height:26px;
+      position: inherit;
+      border-radius: 13px;
+      background:#fff;
+      .el-dialog__close {
+        color: #2d353c;
+        font-weight: bold;
+      }
+    }
+    .end-time {
+      margin: 20px 0;
+    }
+  }
+  .el-tree {
+    height: 300px;
+    overflow: scroll;
+  }
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius:4px;
+    background-color: #909399;
   }
 }
 </style>
