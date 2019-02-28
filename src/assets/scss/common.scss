@@ -11,6 +11,10 @@
     color: #3d464d;
     font-weight: 600;
     font-size: 14px;
+    .label-notnull {
+      color: #d84636;
+      margin-left: 5px;
+    }
   }
   &-desc {
     font-size: 12px;

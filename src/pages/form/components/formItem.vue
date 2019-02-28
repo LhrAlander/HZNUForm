@@ -56,6 +56,8 @@ export default {
 .editform-form-item {
   padding: 5px 10px;
   position: relative;
+  border-left: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
   &.selected {
     background-color: #EBF8FB;
     border-left: 5px solid #0DB3A6;

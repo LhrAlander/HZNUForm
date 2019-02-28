@@ -9,7 +9,7 @@
   .editform-aside
     .editform-aside-items
       .editform-aside-itemtitle 基础字段
-      draggable.editform-aside-block(v-model="baseWidget" :options="widgetDragOp" @end="handleCloneWidget")
+      draggable.editform-aside-block.simple(v-model="baseWidget" :options="widgetDragOp" @end="handleCloneWidget")
         .editform-aside-item-label(
           v-for="widget in baseWidget"
           :key="widget.id")
@@ -25,6 +25,13 @@
           |{{ widget.label }}
   .editform-form
     .editform-form-operate
+      .view-form(@click="goView")
+        i.el-icon-view
+        |预览
+      .save-form
+        el-button.save-btn(type="primary") 保存
+      .publish-form
+        el-button.publish-btn(type="success") 发布
     draggable.editform-form-content(v-model="formData" :options="formItemDragOp" @end="changeFormItemOrder")
       form-item(
         v-for="(formItem, index) in formData"
@@ -34,6 +41,8 @@
         @selected="handleSelectFormItem"
         @delete="handleDeleteFormItem")
   .editform-param
+    .editform-param-title 字段属性
+    widget-set(:info="selectedWidget" @changeParams="setWidget")
 </template>
 
 <script>
@@ -50,11 +59,13 @@ import {
 } from '@/config.js'
 import draggable from 'vuedraggable'
 import FormItem from './components/formItem'
+import WidgetSet from './components/param'
 
 export default {
   components: {
     draggable,
-    FormItem
+    FormItem,
+    WidgetSet
   },
   data () {
     return {
@@ -62,36 +73,37 @@ export default {
         {
           label: '单行文本',
           id: INPUT,
-          icon: 'wenben'
+          icon: 'wenben',
+          widget: null
         },
         {
           label: '多行文本',
           id: TEXTAREA,
-          icon: 'wenben'
+          icon: 'wenben',
+          widget: null
         },
-        // {
-        //   label: '数字',
-        //   id: NUMBER,
-        //   icon: 'shuzi'
-        // },
         {
           label: '单选按钮',
           id: RADIO,
+          widget: null,
           icon: 'danxuan'
         },
         {
           label: '多选框',
           id: CHECKBOX,
+          widget: null,
           icon: 'duoxuan'
         },
         {
           label: '下拉菜单',
           id: SELECT,
+          widget: null,
           icon: 'xiala'
         },
         {
           label: '日期',
           id: DATE,
+          widget: null,
           icon: 'riqi'
         }
       ],
@@ -99,16 +111,19 @@ export default {
         {
           label: '地址',
           id: ADDRESS,
+          widget: null,
           icon: 'dizhi'
         },
         {
           label: '手机',
           id: PHONE,
+          widget: null,
           icon: 'shouji'
         },
         {
           label: '邮箱',
           id: EMAIL,
+          widget: null,
           icon: 'youxiang'
         }
       ],
@@ -126,6 +141,13 @@ export default {
         group: 'widget'
       },
       currentSelect: -1
+    }
+  },
+  computed: {
+    selectedWidget () {
+      let resArr = this.formData.filter(_ => _.widget && _.widget.id === this.currentSelect)
+      if (resArr.length) return resArr[0]
+      return null
     }
   },
   methods: {
@@ -155,25 +177,27 @@ export default {
       })
     },
     handleCloneWidget (e) {
-      console.log('clone', e)
-      this.formData = JSON.parse(JSON.stringify(this.formData))
-      this.formData.forEach((_, i) => {
-        _.index = i
-        if (!_.widget) {
-          _.widget = {
-            type: _.id,
-            id: +new Date()
-          }
-          this.initFormItem(_)
-          delete _.icon
+      const target = /simple/.test(e.target.className) ? this.baseWidget : this.complexWidget
+      const widget = target[e.oldIndex]
+      const replace = {
+        label: widget.label,
+        desc: '',
+        required: false,
+        widget: {
+          id: +new Date(),
+          type: widget.id,
+          items: []
         }
-      })
+      }
+      this.initFormItem(replace)
+      this.formData.splice(e.newIndex, 1, replace)
     },
     // 初始化添加控件的时候初始化该控件属性
     initFormItem (item) {
       let whiteList = [INPUT, TEXTAREA]
       let widget = item.widget
       if (whiteList.includes(widget.type)) return
+      // this.$set(widget, 'items', [])
       widget.items = [
         {
           label: '选项1',
@@ -204,6 +228,29 @@ export default {
       this.currentSelect = formItem.widget.id
     },
     handleDeleteFormItem (formItem) {
+      const index = this.formData.findIndex(_ => _.widget.id === formItem.widget.id)
+      if (index > -1) {
+        this.formData.splice(index, 1)
+      }
+    },
+    setWidget (more) {
+      function packObj (source, obj) {
+        let keys = Object.keys(obj)
+        keys.forEach(k => {
+          if (!source[k] || typeof source[k] !== 'object') {
+            // source[k] = obj[k]
+            this.$set(source, k, obj[k])
+          } else if (typeof source[k] === 'object') {
+            packObj.call(this, source[k], obj[k])
+          }
+        })
+      }
+      let pre = this.formData.filter(_ => _.widget && _.widget.id === this.currentSelect)[0]
+      packObj.call(this, pre, more)
+    },
+    goView () {
+      let formData = JSON.stringify(this.formData)
+      localStorage.setItem('viewForm', formData)
     }
   }
 }
@@ -243,8 +290,8 @@ export default {
     left: 0;
     width: 250px;
     padding: 8px 0;
-    border-right: 1px solid #e0e0e0;
     background: #fff;
+    border-right: 1px solid #e0e0e0;
     &-items {
       .editform-aside-itemtitle {
         padding: 8px 12px;
@@ -286,8 +333,17 @@ export default {
     bottom: 0;
     right: 0;
     width: 300px;
-    border-left: 1px solid #e0e0e0;
     background: #fff;
+    border-left: 1px solid #e0e0e0;
+    &-title {
+      height: 45px;
+      line-height: 28px;
+      font-size: 14px;
+      color: #333;
+      border-bottom: solid 1px #e0e0e0;
+      padding: 8px 0;
+      text-align: center;
+    }
   }
   &-form {
     box-sizing: border-box;
@@ -303,6 +359,28 @@ export default {
       font-size: 18px;
       border-bottom: solid 1px #e0e0e0;
       padding: 8px 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      .view-form {
+        font-size: 14px;
+        color: #409EFF;
+        cursor: pointer;
+        .el-icon-view {
+          margin-right: 5px;
+          color: #409EFF;
+          font-size: 16px;
+        }
+      }
+      .el-button {
+        padding: 0;
+        width: 80px;
+        height: 30px;
+        margin-left: 20px;
+      }
+      .publish-btn {
+        margin-right: 20px;
+      }
     }
     &-content {
       position: absolute;

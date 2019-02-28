@@ -1,7 +1,8 @@
 <template lang="pug">
 .editform-widget-item
   .editform-widget-item-label {{ info.label }}
-  .editform-widget-item-desc(v-if="info.desc") {{ info.desc }}
+    span.label-notnull(v-if="info.required") *
+  .editform-widget-item-desc(v-if="desc") {{ desc }}
   .widget-text-textarea
     el-input(
       disabled
@@ -14,6 +15,11 @@ export default {
     info: {
       type: Object,
       default: () => {}
+    }
+  },
+  computed: {
+    desc () {
+      return this.info.desc
     }
   }
 }
