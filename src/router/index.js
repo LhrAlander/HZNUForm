@@ -8,6 +8,7 @@ const App = () => import('@/pages/app')
 const EditApp = () => import('@/pages/app/editApp')
 const EditForm = () => import('@/pages/form/editForm')
 const ViewForm = () => import('@/pages/form/viewForm')
+const FormData = () => import('@/pages/form/formData')
 
 Vue.use(Router)
 
@@ -51,6 +52,11 @@ export const publicRouters = [
     path: '/view/form',
     name: 'viewForm',
     component: ViewForm
+  },
+  {
+    path: '/form/data/:appId/:formId',
+    name: 'formData',
+    component: FormData
   },
   {
     path: '*',

@@ -1,0 +1,243 @@
+<template lang="pug">
+.formdata
+  .formdata-head
+    .formdata-head-left
+      .formdata-head-left-goback
+        i.el-icon-arrow-left(@click="goback")
+        span.app-name 立项表单
+    .formdata-head-mid
+      .formdata-head-form(@click="goEditForm") 表单设计
+      .formdata-head-data 数据管理
+    .formdata-head-right
+      my-avatar
+  .formdata-cnt
+    .formdata-operate
+      el-button(type="success" @click="selectColumn=true") 显示字段
+      el-button(type="primary") 导出excel
+      .formdata-search
+        el-input(prefix-icon="el-icon-search" placeholder="搜索填写人手机号/邮箱")
+    .formdata-table
+      el-table(
+        :data="resultData"
+        style="width: 100%")
+        el-table-column(
+          v-for="c in selectedColumns"
+          :key="c.prop"
+          :prop="c.prop"
+          :label="c.label"
+          :min-width="c.width")
+        el-table-column(
+          fixed="right"
+          label="操作"
+          width="100")
+          template(slot-scope="scope")
+            el-button(type="text" size="small" @click="deleteData(scope.row)") 删除
+  el-dialog(
+    title="显示字段"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :visible.sync="selectColumn"
+    width="500px")
+    el-checkbox-group(v-model='showColumns')
+      el-checkbox(v-for="c in formColumns" :key="c.prop" :label="c.prop") {{ c.label }}
+</template>
+
+<script>
+import MyAvatar from '@/components/Avatar'
+
+export default {
+  components: {
+    MyAvatar
+  },
+  data () {
+    return {
+      mode: 'mock',
+      formData: [],
+      resultData: [
+        {
+          1551435939053: '林海瑞',
+          1551435928781: '13588737694',
+          1551435951602: '杭州国际服务工程学院',
+          'user': '林海瑞',
+          'time': '2019-03-01'
+        }
+      ],
+      showColumns: [],
+      selectColumn: false
+    }
+  },
+  computed: {
+    formColumns () {
+      return this.formData.map(item => {
+        return {
+          label: item.label,
+          prop: item.widget.id,
+          type: item.widget.type
+        }
+      })
+    },
+    selectedColumns () {
+      let c = [
+        {
+          label: '提交人',
+          prop: 'user',
+          width: '150px'
+        },
+        {
+          label: '提交时间',
+          prop: 'time',
+          width: '150px'
+        }
+      ]
+      this.showColumns.forEach(id => {
+        let column = this.formColumns.find(_ => _.prop === id)
+        let item = {
+          label: column.label,
+          prop: column.prop,
+          width: '150px'
+        }
+        if (column.type === 2 || column.type === 5 || column.type === 8) {
+          item.width = '300px'
+        }
+        c.push(item)
+      })
+      return c
+    }
+  },
+  mounted () {
+    if (this.mode === 'mock') {
+      this.formData = JSON.parse(localStorage.getItem('viewForm'))
+      this.formData.forEach(_ => {
+        _.widget.id = _.widget.id + ''
+        this.showColumns.push(_.widget.id)
+      })
+    }
+  },
+  methods: {
+    goback () {
+      this.$router.push({ name: 'editApp', params: { id: 1 } })
+    },
+    goEditForm () {
+      this.$router.push({ name: 'editForm', params: { appId: 1, formId: 2 } })
+    },
+    deleteData (formData) {
+      console.log(formData)
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.formdata {
+  height: 100%;
+  position: relative;
+  &-head {
+    height: 60px;
+    line-height: 60px;
+    position: relative;
+    z-index: 3;
+    padding: 0 20px;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    background: #fff;
+    box-shadow: 0 2px 5px 0 hsla(0,0%,39%,.15);
+    display: flex;
+    justify-content: space-between;
+    .icon-avatar {
+      font-size: 30px;
+    }
+    &-mid {
+      display: flex;
+      font-size: 16px;
+      font-weight: normal;
+      .formdata-head-data {
+        margin-left: 10px;
+        border-bottom: solid 4px #409EFF;
+        color: #409EFF;
+      }
+      .formdata-head-form,
+      .formdata-head-data {
+        cursor: pointer;
+      }
+    }
+    .el-icon-arrow-left {
+      font-size: 20px;
+      font-weight: bold;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .el-icon-edit {
+      margin-left: 5px;
+      cursor: pointer;
+    }
+  }
+  &-cnt {
+    padding: 20px;
+    .formdata-operate {
+      display: flex;
+    }
+    .formdata-search {
+      width: 316px;
+      margin: 0 10px;
+    }
+    .formdata-table {
+      margin: 20px auto;
+      .el-table {
+        border-radius: 4px;
+        th {
+          padding: 0;
+          height: 50px;
+          line-height: 50px;
+          font-size: 14px;
+          color: #909399;
+          background: #f3f3f3;
+        }
+        thead {
+          height: 50px;
+        }
+      }
+    }
+  }
+  .el-dialog {
+    border-radius: 10px;
+    &__header {
+      height:49px;
+      padding: 0 14px;
+      line-height: 49px;
+      background:#2d353c;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    &__title {
+      color: #fff;
+      font-size:16px;
+    }
+    &__headerbtn {
+      width:26px;
+      height:26px;
+      position: inherit;
+      border-radius: 13px;
+      background:#fff;
+      .el-dialog__close {
+        color: #2d353c;
+        font-weight: bold;
+      }
+    }
+  }
+  .el-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    .el-checkbox {
+      margin-right: 30px;
+      margin-bottom: 10px;
+    }
+    .el-checkbox + .el-checkbox {
+      margin-left: 0;
+    }
+  }
+}
+</style>

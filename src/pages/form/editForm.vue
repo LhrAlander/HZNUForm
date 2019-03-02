@@ -6,6 +6,11 @@
         i.el-icon-arrow-left(@click="goback")
         span.app-name 立项表单
         i.el-icon-edit(@click="rename")
+    .editform-head-mid
+      .editform-head-form 表单设计
+      .editform-head-data(@click="goFormData") 数据管理
+    .editform-head-right
+      my-avatar
   .editform-aside
     .editform-aside-items
       .editform-aside-itemtitle 基础字段
@@ -81,12 +86,14 @@ import {
 import draggable from 'vuedraggable'
 import FormItem from './components/formItem'
 import WidgetSet from './components/param'
+import MyAvatar from '@/components/Avatar'
 
 export default {
   components: {
     draggable,
     FormItem,
-    WidgetSet
+    WidgetSet,
+    MyAvatar
   },
   data () {
     return {
@@ -283,6 +290,9 @@ export default {
       const { href } = this.$router.resolve({ name: 'viewForm' })
       window.open(href, '_blank')
     },
+    goFormData () {
+      this.$router.push({ name: 'formData', param: { appId: 1, formId: 2 } })
+    },
     handleClosePublish (done) {
       let el = this.$refs.structTree
       let structs = el.getCheckedKeys()
@@ -327,6 +337,25 @@ export default {
     font-weight: bold;
     background: #fff;
     box-shadow: 0 2px 5px 0 hsla(0,0%,39%,.15);
+    display: flex;
+    justify-content: space-between;
+    &-mid {
+      display: flex;
+      font-size: 16px;
+      font-weight: normal;
+      .editform-head-form {
+        margin-right: 10px;
+        border-bottom: solid 4px #409EFF;
+        color: #409EFF;
+      }
+      .editform-head-form,
+      .editform-head-data {
+        cursor: pointer;
+      }
+    }
+    .icon-avatar {
+      font-size: 30px;
+    }
     .el-icon-arrow-left {
       font-size: 20px;
       font-weight: bold;

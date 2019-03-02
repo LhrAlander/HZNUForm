@@ -18,7 +18,7 @@
             .app-icon-item(v-for="iconIndex in 10" :key="iconIndex" :style="{ background: app.color }" @click="changeIcon(app, iconIndex)")
               i.iconfont(:class="'icon-app'+iconIndex")
           i.iconfont.icon-shezhi(slot="reference" @click.stop="")
-        i.iconfont.icon-fuzhi(title="复制应用" @click.stop="handleCopyApp(app)")
+        //- i.iconfont.icon-fuzhi(title="复制应用" @click.stop="handleCopyApp(app)")
         el-popover(
           trigger="click"
           popper-class="app-name-set"
@@ -173,7 +173,7 @@ export default {
     flex-wrap: wrap;
     justify-content: space-between;
     .app-icon-item {
-      width: 54px;
+      width: 48px;
       height: 46px;
       margin-bottom: 3px;
       text-align: center;

@@ -9,10 +9,16 @@
       :data-router="item.router"
       :key="item.router"
       :class="{active: item.router === activeMenu}") {{ item.label }}
+    .c-fheader-avatar
+      my-avatar
 </template>
 
 <script>
+import MyAvatar from '../Avatar'
 export default {
+  components: {
+    MyAvatar
+  },
   data () {
     return {
       menuItems: [
@@ -53,6 +59,7 @@ export default {
     display: flex;
     align-items: center;
     color: #e3fdfd;
+    position: relative;
   }
   &-title {
     margin-left: 5px;
@@ -82,6 +89,14 @@ export default {
         left: 0;
         right: 0;
       }
+    }
+  }
+  &-avatar {
+    position: absolute;
+    right: 30px;
+    .iconfont {
+      color: #fff;
+      font-size: 30px;
     }
   }
 }

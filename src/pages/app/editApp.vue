@@ -5,6 +5,8 @@
       .editapp-head-left-goback
         i.el-icon-arrow-left(@click="goback")
         span.app-name 测试
+    .editapp-head-right
+      my-avatar
   .editapp-aside
     .editapp-aside-operate
       .editapp-aside-addgroup(v-if="!changeOrder" @click="handleAddGroup")
@@ -69,9 +71,11 @@
 
 <script>
 import draggable from 'vuedraggable'
+import MyAvatar from '@/components/Avatar'
 export default {
   components: {
-    draggable
+    draggable,
+    MyAvatar
   },
   data () {
     return {
@@ -274,11 +278,16 @@ export default {
     font-weight: bold;
     background: #fff;
     box-shadow: 0 2px 5px 0 hsla(0,0%,39%,.15);
+    display: flex;
+    justify-content: space-between;
     .el-icon-arrow-left {
       font-size: 20px;
       font-weight: bold;
       margin-right: 10px;
       cursor: pointer;
+    }
+    .iconfont.icon-avatar {
+      font-size: 30px;
     }
   }
   &-aside {
