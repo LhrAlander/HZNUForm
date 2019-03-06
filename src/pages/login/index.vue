@@ -29,7 +29,8 @@
 </template>
 
 <script>
-import request from '@/utils/request'
+import { loginAPI } from '@/api/index'
+import { saveLoginInfo } from '@/utils/storage.js'
 
 export default {
   data () {
@@ -57,24 +58,25 @@ export default {
     }
   },
   mounted () {
-    console.log(this.$route, this.$router)
   },
   methods: {
     goReg () {
       this.$router.push({ name: 'reg' })
     },
-    handleSubmit (e) {
-      request
-        .post('http://127.0.0.1:3000/users/login', {
-          phone: this.loginForm.account,
-          password: this.loginForm.checkPass
-        })
-        .then(res => {
-          console.log('这里处理回应')
-        })
-        .catch(err => {
-          console.log('这里处理错误', err)
-        })
+    async handleSubmit (e) {
+      try {
+        let user = {
+          password: this.loginForm.checkPass,
+          phone: this.loginForm.account
+        }
+        let loginRes = await loginAPI(user)
+        const userInfo = loginRes.data
+        delete userInfo.password
+        saveLoginInfo(userInfo)
+        this.$router.push({ name: 'contact' })
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 }

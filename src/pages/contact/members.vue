@@ -62,7 +62,7 @@
     el-tree(
       :data="structs"
       show-checkbox
-      node-key="label"
+      node-key="id"
       ref="structTree"
     )
     .contact-struct-btns
@@ -71,78 +71,24 @@
 </template>
 
 <script>
+import {
+  getContactMembersAPI,
+  addMemberBatchAPI,
+  getContactsAPI,
+  deleteMemberAPI
+} from '@/api/index.js'
+
 export default {
+  props: {
+    id: {
+      type: Number,
+      default: 0
+    }
+  },
   data () {
     return {
       searchTxt: '',
-      members: [
-        {
-          id: 1,
-          name: '林海瑞',
-          phone: '13588737694',
-          mail: 'AlanderLt@163.com'
-        },
-        {
-          id: 2,
-          name: '林海瑞',
-          phone: '13588737694',
-          mail: 'AlanderLt@163.com'
-        },
-        {
-          id: 3,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 4,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 5,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 6,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 7,
-          name: '林海瑞',
-          phone: '13588737694',
-          mail: 'AlanderLt@163.com'
-        },
-        {
-          id: 8,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 9,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 10,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        },
-        {
-          id: 11,
-          name: '其他',
-          phone: '13588737693',
-          mail: '1147816814@qq.com'
-        }
-      ],
+      members: [],
       filter: '',
       dialogVisible: false,
       changeStructDialog: false,
@@ -151,12 +97,8 @@ export default {
       pageSize: 10,
       currentPage: 1,
       filterTimer: null,
-      // structs: ['杭州国际服务工程学院', '阿里巴巴商学院', '理学院', '后勤部门', '教务处']
-      structs: [
-        { label: '杭州国际服务工程学院' }, { label: '阿里巴巴商学院' }, { label: '理学院' }, { label: '后勤部门' }, { label: '教务处' },
-        { label: '杭州国际服务工程学院2' }, { label: '阿里巴巴商学院2' }, { label: '理学院2' }, { label: '后勤部门2' }, { label: '教务处2' },
-        { label: '杭州国际服务工程学院3' }, { label: '阿里巴巴商学院3' }, { label: '理学院3' }, { label: '后勤部门3' }, { label: '教务处3' },
-        { label: '杭州国际服务工程学院4' }, { label: '阿里巴巴商学院4' }, { label: '理学院4' }, { label: '后勤部门4' }, { label: '教务处4' }]
+      structs: [],
+      selection: []
     }
   },
   computed: {
@@ -174,7 +116,24 @@ export default {
       return source.slice(start, end)
     }
   },
+  mounted () {
+    getContactsAPI()
+      .then(res => {
+        console.log(res)
+        this.structs = res.data.map(_ => {
+          return {
+            label: _.groupName,
+            id: _.id
+          }
+        }).filter(_ => _.id !== this.id)
+      })
+    this.getMembers()
+  },
   methods: {
+    async getMembers () {
+      let members = await getContactMembersAPI(this.id)
+      this.flushMembersData(members.data)
+    },
     handleCloseAdd (done) {
       this.memberPhones = ''
       done()
@@ -195,20 +154,29 @@ export default {
         this.filter = v.trim()
       }, 300)
     },
-    handleConfirmAdd () {
+    async handleConfirmAdd () {
       let phones = this.memberPhones.split(/[\n\r,、，]/)
-      console.log(phones)
       this.dialogVisible = false
       this.memberPhones = ''
+      let params = {
+        cgIds: [this.id],
+        id: this.id,
+        members: phones
+      }
+      let users = await addMemberBatchAPI(params)
+      this.flushMembersData(users.data)
       this.$message({
         message: '添加用户成功',
         type: 'success'
       })
     },
     handleTableSelect (selection) {
-      if (!this.selection[this.currentPage]) {
-        this.selection[this.currentPage] = selection
-      }
+      this.selection = selection.map(_ => {
+        return {
+          phone: _.phone,
+          id: _.id
+        }
+      })
     },
     handleCurrentPageChange (current) {
       this.currentPage = current
@@ -223,21 +191,34 @@ export default {
       this.changeStructDialog = false
       this.$message('取消调整分组')
     },
-    handleConfirmChange () {
+    async handleConfirmChange () {
       let el = this.$refs.structTree
-      let structs = el.getCheckedKeys()
-      el.setCheckedNodes(structs)
+      let cgIds = el.getCheckedKeys()
+      el.setCheckedNodes(cgIds)
+      let params = {
+        cgIds,
+        id: this.id,
+        members: this.selection.map(_ => _.phone)
+      }
+      let users = await addMemberBatchAPI(params)
+      this.flushMembersData(users.data)
       this.changeStructDialog = false
       this.$message({
         message: '调整分组成功',
         type: 'success'
       })
     },
-    handleDeleteMembers () {
+    async handleDeleteMembers () {
       this.$confirm('您确定要删除所选成员？', {
         type: 'error'
       })
-        .then(() => {
+        .then(async () => {
+          let params = {
+            id: this.id,
+            memberIds: this.selection.map(_ => _.id)
+          }
+          let users = await deleteMemberAPI(params)
+          this.flushMembersData(users.data)
           this.$message({
             message: '删除成员成功',
             type: 'success'
@@ -246,6 +227,16 @@ export default {
         .catch(() => {
           this.$message('取消删除')
         })
+    },
+    flushMembersData (data) {
+      this.members = data.map(_ => {
+        return {
+          name: _.name,
+          id: _.id,
+          phone: _.member,
+          mail: _.email
+        }
+      })
     }
   }
 }

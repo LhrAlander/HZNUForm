@@ -2,6 +2,8 @@ import axios from 'axios'
 import router from '@/router'
 import { Message } from 'element-ui'
 
+axios.defaults.withCredentials = true
+
 const instance = axios.create()
 
 const cancelToken = {}
@@ -22,7 +24,17 @@ instance.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 
-instance.interceptors.response.use(({ data }) => data, function (error) {
+instance.interceptors.response.use(({ data }) => {
+  if (data && data.code && data.code === 'NACK') {
+    Message.error(data.message)
+    return Promise.reject(data)
+  }
+  if (data && data.code && data.code === 'UNAUTHORIZED') {
+    Message.error('没有访问权限或登录已过期，请重新登录')
+    return Promise.reject(data)
+  }
+  return data
+}, function (error) {
   if (error.response && error.response.status === 403) {
     Message.error('没有访问权限或登录已过期，请重新登录')
   }

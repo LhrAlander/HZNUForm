@@ -197,7 +197,7 @@ export default {
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /\w+/,
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
         inputPlaceholder: '',
         inputErrorMessage: '表单名称不能为空'
       }).then(({ value }) => {

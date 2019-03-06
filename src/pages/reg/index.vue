@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import request from '@/utils/request'
+import { regAPI } from '@/api/index'
 
 export default {
   data () {
@@ -64,18 +64,19 @@ export default {
     goLogin () {
       this.$router.push({ name: 'login' })
     },
-    handleSubmit (e) {
-      request
-        .post('http://127.0.0.1:3000/users/login', {
-          phone: this.regForm.account,
-          password: this.regForm.checkPass
-        })
-        .then(res => {
-          console.log('这里处理回应')
-        })
-        .catch(err => {
-          console.log('这里处理错误', err)
-        })
+    async handleSubmit (e) {
+      try {
+        let user = {
+          email: '',
+          password: this.regForm.checkPass,
+          phone: this.regForm.phone,
+          username: this.regForm.name
+        }
+        let regRes = await regAPI(user)
+        console.log(regRes)
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 }

@@ -2,13 +2,13 @@
 .contact-overview
   .contact-overview-item(
     v-for="struct in structs"
-    :key="struct.label")
+    :key="struct.id")
     .contact-item-name(:style="{ 'background-color': struct.color }") {{ struct.label[0] }}
     .contact-item-label(:title="struct.label") {{ struct.label }}
     .contact-item-operate
-      .contact-operate-view(@click="handleViewClick" title="查看人员")
+      .contact-operate-view(@click="handleViewClick(struct.id)" title="查看人员")
         i.el-icon-view
-      .contact-operate-delete(@click="handleDeleteClick" title="删除分组")
+      .contact-operate-delete(@click="handleDeleteClick(struct.id)" title="删除分组")
         i.el-icon-delete
   .contact-overview-item.add-contact-item(@click="handleAddClick")
     .contact-item-name
@@ -17,36 +17,28 @@
 </template>
 
 <script>
+import { getContactsAPI, addContactAPI, delContactAPI } from '@/api/index.js'
+
 const colors = ['#07689f', '#10ddc2', '#384259', '#393e46', '#1f4e5f', '#00adb5', '#284184', '#39065a']
 
 export default {
   data () {
     return {
-      structs: [
-        {
-          label: '杭州国际服务工程学院',
-          color: colors[0]
-        },
-        {
-          label: '阿里巴巴商学院',
-          color: colors[3]
-        },
-        {
-          label: '理学院',
-          color: colors[7]
-        },
-        {
-          label: '后勤部门',
-          color: colors[1]
-        },
-        {
-          label: '教务处',
-          color: colors[4]
-        }
-      ]
+      structs: []
     }
   },
+  mounted () {
+    this.getContacts()
+  },
   methods: {
+    async getContacts () {
+      try {
+        let contacts = await getContactsAPI()
+        this.flushStructData(contacts.data)
+      } catch (error) {
+        console.log(error)
+      }
+    },
     handleAddClick () {
       this.$prompt('', '新建分组', {
         showClose: false,
@@ -54,13 +46,22 @@ export default {
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /\w+/,
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: `创建分组${value}成功`
-        })
+        console.log(value)
+        addContactAPI({ groupName: value })
+          .then(res => {
+            console.log(res)
+            this.flushStructData(res.data)
+            this.$message({
+              type: 'success',
+              message: `创建分组${value}成功`
+            })
+          })
+          .catch(() => {
+            this.$message.error('创建失败')
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -68,7 +69,7 @@ export default {
         })
       })
     },
-    handleDeleteClick () {
+    handleDeleteClick (id) {
       console.log('delete')
       this.$confirm('此操作将永久删除该分组, 是否继续?', {
         showClose: false,
@@ -78,10 +79,17 @@ export default {
         cancelButtonText: '取消',
         type: 'error'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        delContactAPI({ id })
+          .then(delRes => {
+            this.flushStructData(delRes.data)
+            this.$message({
+              type: 'success',
+              message: `删除分组成功`
+            })
+          })
+          .catch(() => {
+            this.$message.error('删除失败')
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -89,8 +97,18 @@ export default {
         })
       })
     },
-    handleViewClick () {
-      this.$emit('viewMember', { structId: 1 })
+    flushStructData (data) {
+      this.structs = data.map(_ => {
+        return {
+          label: _.groupName,
+          id: _.id,
+          phone: _.phone,
+          color: colors[_.id % 8]
+        }
+      })
+    },
+    handleViewClick (id) {
+      this.$emit('viewMember', id)
     }
   }
 }

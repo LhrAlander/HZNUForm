@@ -8,6 +8,7 @@
   el-dialog(
     title="选择团队"
     width="300px"
+    custom-class="avatar"
     :append-to-body="true"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
@@ -77,7 +78,7 @@ export default {
 </script>
 
 <style lang="scss">
-.el-dialog {
+.avatar.el-dialog {
   .team-item {
     margin: 20px 0;
     font-size: 26px;

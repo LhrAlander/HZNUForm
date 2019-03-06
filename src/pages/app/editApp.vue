@@ -180,7 +180,7 @@ export default {
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /\w+/,
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
         inputPlaceholder: form.formName,
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
@@ -216,7 +216,7 @@ export default {
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /\w+/,
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
         inputPlaceholder: group.name,
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
@@ -238,7 +238,7 @@ export default {
         closeOnPressEscape: false,
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /\w+/,
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
         inputPlaceholder: '请输入分组名称',
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {

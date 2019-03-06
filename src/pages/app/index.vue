@@ -29,6 +29,7 @@
           //-   el-button(@click="app.nameVisible = false") 取消
           //-   el-button(type="primary" @click="app.nameVisible = false") 确定
           i.el-icon-edit(slot="reference" title="修改名称" @click.stop="app.nameVisible = true")
+    .app-item.add(data-name="新建应用" @click="handleAddApp") +
 </template>
 
 <script>
@@ -70,17 +71,19 @@ export default {
     changeIcon (app, index) {
       app.icon = index
     },
-    handleCopyApp (app) {
-      this.$confirm('将复制该应用的表单、报表等，但不会复制应用内数据', `您是否要复制“${app.name}”?`)
-        .then(() => {
-          this.$message({
-            message: '应用已复制',
-            type: 'success'
-          })
-        })
-        .catch(() => {
-          this.$message('取消复制')
-        })
+    handleAddApp (app) {
+      this.$prompt('应用名称', {
+        showClose: false,
+        closeOnClickModal: false,
+        closeOnPressEscape: false,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
+        inputPlaceholder: '',
+        inputErrorMessage: '名称不能为空'
+      }).then(({ value }) => {
+      }).catch(() => {
+      })
     },
     handleDelApp (app) {
       this.$confirm('表单、报表以及数据将一并删除，且无法还原。', `您确定要删除“${app.name}”吗?`, {
@@ -118,6 +121,13 @@ export default {
     margin: 30px 35px;
     position: relative;
     cursor: pointer;
+    &.add {
+      font-weight: normal;
+      font-size: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     &::after {
       content: attr(data-name);
       color: #333;
