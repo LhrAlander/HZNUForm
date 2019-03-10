@@ -4,7 +4,7 @@
     .editapp-head-left
       .editapp-head-left-goback
         i.el-icon-arrow-left(@click="goback")
-        span.app-name 测试
+        span.app-name {{ app.name }}
     .editapp-head-right
       my-avatar
   .editapp-aside
@@ -23,7 +23,7 @@
         draggable(v-model="groups"  @start="drag=true" @end="drag=false" :options="{ group:'group', disabled: !changeOrder }")
           el-collapse-item.editapp-aside-item(
             v-if="group.groupId !== -1"
-            v-for="group in groups"
+            v-for="group in app.groups"
             :key="group.groupId")
             template(slot="title")
               i.iconfont.icon-wenjianjia
@@ -72,6 +72,15 @@
 <script>
 import draggable from 'vuedraggable'
 import MyAvatar from '@/components/Avatar'
+
+import { getLoginUser } from '@/utils/storage.js'
+
+import {
+  getAppsAPI,
+  addAppGroupAPI,
+  updateAppGroupAPI
+} from '@/api/index.js'
+
 export default {
   components: {
     draggable,
@@ -90,7 +99,7 @@ export default {
               formName: '1.立项'
             },
             {
-              type: 2,
+              type: 1,
               formId: 102,
               formName: '2.项目计划安排'
             },
@@ -138,21 +147,33 @@ export default {
           ]
         }
       ],
-      changeOrder: false
+      changeOrder: false,
+      app: {}
     }
   },
   computed: {
     unGroupForms: {
       get () {
-        return this.groups.filter(_ => _.groupId === -1)[0].forms
+        if (!this.app || !this.app.groups) return []
+        let groups = this.app.groups.filter(_ => _.groupId === -1)
+        if (!groups.length || !groups[0].forms) return []
+        return groups[0].forms
       },
       set (v) {
         console.log(v)
-        this.groups.filter(_ => _.groupId === -1)[0].forms = v
+        this.app.groups.filter(_ => _.groupId === -1)[0].forms = v
       }
     }
   },
+  mounted () {
+    this.getCurrentApp()
+  },
   methods: {
+    async getCurrentApp () {
+      let { phone } = getLoginUser()
+      let apps = await getAppsAPI(phone)
+      this.flushAppData(apps)
+    },
     goback () {
       this.$router.push({ name: 'app' })
     },
@@ -184,10 +205,17 @@ export default {
         inputPlaceholder: form.formName,
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: '修改成功'
-        })
+        // updateAppGroupAPI({ name: value, appid: this.app.appId })
+        //   .then(res => {
+        //     console.log(res)
+        //     this.$message({
+        //       type: 'success',
+        //       message: '修改成功'
+        //     })
+        //   })
+        //   .catch(err => {
+        //     console.log(err)
+        //   })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -210,6 +238,7 @@ export default {
         })
     },
     handleRenameGroup (group) {
+      console.log(group)
       this.$prompt('修改名称', {
         showClose: false,
         closeOnClickModal: false,
@@ -220,10 +249,23 @@ export default {
         inputPlaceholder: group.name,
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: '修改成功'
-        })
+        let params = {
+          appid: this.app.appId,
+          id: group.groupId,
+          name: value
+        }
+        updateAppGroupAPI(params)
+          .then(res => {
+            console.log(res)
+            this.flushAppData(res)
+            this.$message({
+              type: 'success',
+              message: '修改成功'
+            })
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -242,10 +284,17 @@ export default {
         inputPlaceholder: '请输入分组名称',
         inputErrorMessage: '分组名称不能为空'
       }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: '新建成功'
-        })
+        addAppGroupAPI({ name: value, appid: this.app.appId })
+          .then(res => {
+            this.flushAppData(res)
+            this.$message({
+              type: 'success',
+              message: '新建成功'
+            })
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -258,6 +307,10 @@ export default {
     },
     handleCreateForm () {
       this.$router.push({ name: 'editForm', params: { appId: 1, formId: 2 } })
+    },
+    flushAppData ({ data }) {
+      let appId = this.$route.params.id
+      this.app = data.find(_ => parseInt(_.appId) === parseInt(appId))
     }
   }
 }

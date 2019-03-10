@@ -13,3 +13,9 @@ export const delContactAPI = groupName => request.post(`${HOST}/deleteContact`, 
 export const getContactMembersAPI = groupId => request.get(`${HOST}/members?id=${groupId}`)
 export const addMemberBatchAPI = params => request.post(`${HOST}/addMemberBatch`, params)
 export const deleteMemberAPI = params => request.post(`${HOST}/deleteMember`, params)
+
+export const addAppAPI = params => request.post(`${HOST}/addApp`, params)
+export const getAppsAPI = phone => request.get(`${HOST}/apps?phone=${phone}`)
+export const updateAppAPI = params => request.post(`${HOST}/updateApp`, params)
+export const addAppGroupAPI = params => request.post(`${HOST}/addAppGroup`, params)
+export const updateAppGroupAPI = params => request.post(`${HOST}/updateAppGroup`, params)

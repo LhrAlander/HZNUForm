@@ -2,7 +2,7 @@
 .apps
   f-header
   .apps-wrapper
-    .app-item(v-for="app in apps" :key="app.id" :data-name="app.name" @click="goApp(app)")
+    .app-item(v-for="app in apps" :key="app.appId" :data-name="app.name" @click="goApp(app)")
       .app-item-bar(:style="{ background: app.color }")
       .app-item-icon
         i.iconfont(:class="'icon-app' + app.icon" :style="{ color: app.color }")
@@ -24,7 +24,7 @@
           popper-class="app-name-set"
           v-model="app.nameVisible"
           width="230")
-          el-input(v-model="app.name")
+          el-input(v-model="app.name" @input="updateApp(app)")
           //- .btn-group
           //-   el-button(@click="app.nameVisible = false") 取消
           //-   el-button(type="primary" @click="app.nameVisible = false") 确定
@@ -35,6 +35,13 @@
 <script>
 import FHeader from 'components/Fheader'
 
+import {
+  addAppAPI,
+  getAppsAPI,
+  updateAppAPI
+} from '@/api/index.js'
+import { getLoginUser, saveAppInfo } from '@/utils/storage.js'
+
 export default {
   components: {
     FHeader
@@ -42,34 +49,47 @@ export default {
   data () {
     return {
       colors: ['#f96d64', '#f5c547', '#52ce87', '#4ec2e9', '#5d9cee', '#ac92ec'],
-      apps: [
-        {
-          id: 1,
-          name: '测试',
-          icon: 1,
-          color: '#f96d64',
-          nameVisible: false
-        },
-        {
-          id: 2,
-          name: '项目管理',
-          icon: 2,
-          color: '#f5c547',
-          nameVisible: false
-        }
-      ],
+      apps: [],
       test: '测试',
       changeNamePop: false,
-      visible2: true
+      visible2: true,
+      updateAppTimer: null
     }
   },
+  mounted () {
+    this.getApps()
+  },
   methods: {
+    async getApps () {
+      let { phone } = getLoginUser()
+      let data = await getAppsAPI(phone)
+      this.flushAppList(data)
+    },
     changeColor (app, color) {
       console.log(app, color)
       app.color = color
+      this.updateApp(app)
     },
     changeIcon (app, index) {
       app.icon = index
+      this.updateApp(app)
+    },
+    updateApp (app) {
+      if (this.updateAppTimer) {
+        clearTimeout(this.updateAppTimer)
+      }
+      this.updateAppTimer = setTimeout(() => {
+        let { phone } = getLoginUser()
+        let { color, icon, name } = app
+        let id = app.appId
+        updateAppAPI({ color, icon, id, name, phone })
+          .then(res => {
+            this.flushAppList(res)
+          })
+          .catch(err => {
+            console.log('err', err)
+          })
+      }, 500)
     },
     handleAddApp (app) {
       this.$prompt('应用名称', {
@@ -82,6 +102,15 @@ export default {
         inputPlaceholder: '',
         inputErrorMessage: '名称不能为空'
       }).then(({ value }) => {
+        let params = {
+          color: this.colors[0],
+          icon: 1,
+          name: value
+        }
+        addAppAPI(params)
+          .then(res => {
+            this.flushAppList(res)
+          })
       }).catch(() => {
       })
     },
@@ -100,7 +129,11 @@ export default {
         })
     },
     goApp (app) {
-      this.$router.push({ name: 'editApp', params: { id: app.id } })
+      saveAppInfo(app)
+      this.$router.push({ name: 'editApp', params: { id: app.appId } })
+    },
+    flushAppList ({ data }) {
+      this.apps = data
     }
   }
 }

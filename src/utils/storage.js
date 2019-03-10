@@ -11,5 +11,13 @@ export const saveLoginInfo = user => {
 }
 
 export const getLoginUser = () => {
-  getItem('user')
+  return getItem('user')
+}
+
+export const saveAppInfo = app => {
+  setItem('app', app)
+}
+
+export const getAppInfo = () => {
+  return getItem('app')
 }
