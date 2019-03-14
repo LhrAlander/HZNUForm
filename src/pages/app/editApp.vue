@@ -4,7 +4,7 @@
     .editapp-head-left
       .editapp-head-left-goback
         i.el-icon-arrow-left(@click="goback")
-        span.app-name {{ app.name }}
+        span.app-name {{ app.name || '' }}
     .editapp-head-right
       my-avatar
   .editapp-aside
@@ -22,7 +22,7 @@
       el-collapse
         draggable(v-model="groups"  @start="drag=true" @end="drag=false" :options="{ group:'group', disabled: !changeOrder }")
           el-collapse-item.editapp-aside-item(
-            v-if="group.groupId !== -1"
+            v-if="group.groupId !== 0"
             v-for="group in app.groups"
             :key="group.groupId")
             template(slot="title")
@@ -39,32 +39,26 @@
               .editapp-group-form(
                 v-for="form in group.forms"
                 :key="form.formId"
-                @click="viewForm(form)")
-                i.iconfont.icon-biaodan(v-if="form.type === 1")
-                i.iconfont.icon-baobiao(v-else)
+                @click="viewForm(group.groupId, form)")
+                i.iconfont.icon-biaodan
                 |{{ form.formName }}
-                i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
-                i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
+                i.edit-icon.el-icon-edit(@click.stop="handleRenameForm(form)")
+                i.edit-icon.el-icon-delete(@click.stop="handleDeleteForm(form)")
       draggable(v-model="unGroupForms"  @start="drag=true" @end="drag=false" :options="{ group:'forms', disabled: !changeOrder }")
         .editapp-ungroup-form(
           v-for="form in unGroupForms"
           :key="form.formId"
-          @click="viewForm(form)")
-          i.iconfont.icon-biaodan(v-if="form.type === 1")
-          i.iconfont.icon-baobiao(v-else)
+          @click.stop="viewForm(0, form)")
+          i.iconfont.icon-biaodan
           |{{ form.formName }}
-          i.edit-icon.el-icon-edit(@click="handleRenameForm(form)")
-          i.edit-icon.el-icon-delete(@click="handleDeleteForm(form)")
+          i.edit-icon.el-icon-edit(@click.stop="handleRenameForm(form)")
+          i.edit-icon.el-icon-delete(@click.stop="handleDeleteForm(form)")
   .editapp-content
     .editapp-add-wrapper
       .editapp-add-form(@click="handleCreateForm")
         .editapp-add-icon.new-form
         .editapp-add-title 新建表单
         .editapp-add-message 表单可用来搜集数据，适合进行数据上报
-      .editapp-add-report
-        .editapp-add-icon.new-report
-        .editapp-add-title 新建报表
-        .editapp-add-message 报表适合用来进行数据汇总、结果展示，趋势分析等
     //- .editapp-set
     //-   el-button(type="primary" plain) 应用设置
 </template>
@@ -78,7 +72,9 @@ import { getLoginUser } from '@/utils/storage.js'
 import {
   getAppsAPI,
   addAppGroupAPI,
-  updateAppGroupAPI
+  updateAppGroupAPI,
+  deleteFormAPI,
+  deleteAppGroupAPI
 } from '@/api/index.js'
 
 export default {
@@ -88,65 +84,7 @@ export default {
   },
   data () {
     return {
-      groups: [
-        {
-          groupId: 1,
-          name: '项目计划&任务填写1',
-          forms: [
-            {
-              type: 1,
-              formId: 101,
-              formName: '1.立项'
-            },
-            {
-              type: 1,
-              formId: 102,
-              formName: '2.项目计划安排'
-            },
-            {
-              type: 1,
-              formId: 103,
-              formName: '3.项目任务安排'
-            }
-          ]
-        },
-        {
-          groupId: 2,
-          name: '项目计划&任务填写',
-          forms: [
-            {
-              type: 1,
-              formId: 301,
-              formName: '1.立项'
-            },
-            {
-              type: 2,
-              formId: 302,
-              formName: '2.项目计划安排'
-            },
-            {
-              type: 1,
-              formId: 303,
-              formName: '3.项目任务安排'
-            }
-          ]
-        },
-        {
-          groupId: -1,
-          forms: [
-            {
-              type: 1,
-              formId: 104,
-              formName: '另类表单'
-            },
-            {
-              type: 2,
-              formId: 105,
-              formName: '报表类型'
-            }
-          ]
-        }
-      ],
+      groups: [],
       changeOrder: false,
       app: {}
     }
@@ -155,13 +93,13 @@ export default {
     unGroupForms: {
       get () {
         if (!this.app || !this.app.groups) return []
-        let groups = this.app.groups.filter(_ => _.groupId === -1)
+        let groups = this.app.groups.filter(_ => _.groupId === 0)
         if (!groups.length || !groups[0].forms) return []
         return groups[0].forms
       },
       set (v) {
         console.log(v)
-        this.app.groups.filter(_ => _.groupId === -1)[0].forms = v
+        this.app.groups.filter(_ => _.groupId === 0)[0].forms = v
       }
     }
   },
@@ -177,18 +115,23 @@ export default {
     goback () {
       this.$router.push({ name: 'app' })
     },
-    viewForm (form) {
-      console.log(form)
+    viewForm (agid, form) {
+      this.$router.push({ name: 'editForm', params: { appId: this.app.appId, groupId: agid, formId: form.formId } })
     },
     handleDeleteForm (form) {
       this.$confirm('删除将清空数据，且无法还原。', `您确定要删除“${form.formName}”吗?`, {
         type: 'error'
       })
         .then(() => {
-          this.$message({
-            message: '已删除',
-            type: 'success'
-          })
+          deleteFormAPI(form.formId)
+            .then(res => {
+              console.log(res)
+              this.flushAppData(res)
+              this.$message({
+                message: '已删除',
+                type: 'success'
+              })
+            })
         })
         .catch(() => {
           this.$message('取消删除')
@@ -228,10 +171,14 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          this.$message({
-            message: '已删除',
-            type: 'success'
-          })
+          deleteAppGroupAPI(group.groupId)
+            .then(res => {
+              this.flushAppData(res)
+              this.$message({
+                message: '已删除',
+                type: 'success'
+              })
+            })
         })
         .catch(() => {
           this.$message('取消删除')
@@ -306,7 +253,7 @@ export default {
       this.changeOrder = false
     },
     handleCreateForm () {
-      this.$router.push({ name: 'editForm', params: { appId: 1, formId: 2 } })
+      this.$router.push({ name: 'addForm', params: { appId: this.$route.params.id } })
     },
     flushAppData ({ data }) {
       let appId = this.$route.params.id

@@ -38,7 +38,8 @@ import FHeader from 'components/Fheader'
 import {
   addAppAPI,
   getAppsAPI,
-  updateAppAPI
+  updateAppAPI,
+  deleteAppAPI
 } from '@/api/index.js'
 import { getLoginUser, saveAppInfo } from '@/utils/storage.js'
 
@@ -119,10 +120,14 @@ export default {
         type: 'error'
       })
         .then(() => {
-          this.$message({
-            message: '应用已删除',
-            type: 'success'
-          })
+          deleteAppAPI(app.appId)
+            .then(res => {
+              this.flushAppList(res)
+                this.$message({
+                  message: '应用已删除',
+                  type: 'success'
+                })
+            })
         })
         .catch(() => {
           this.$message('取消删除')

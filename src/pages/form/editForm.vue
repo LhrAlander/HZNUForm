@@ -4,7 +4,7 @@
     .editform-head-left
       .editform-head-left-goback
         i.el-icon-arrow-left(@click="goback")
-        span.app-name 立项表单
+        span.app-name {{ formName }}
         i.el-icon-edit(@click="rename")
     .editform-head-mid
       .editform-head-form 表单设计
@@ -34,7 +34,7 @@
         i.el-icon-view
         |预览
       .save-form
-        el-button.save-btn(type="primary") 保存
+        el-button.save-btn(type="primary" @click="saveForm") 保存
       .publish-form
         el-button.publish-btn(type="success" @click="publishVisiable=true") 发布
     draggable.editform-form-content(v-model="formData" :options="formItemDragOp" @end="changeFormItemOrder")
@@ -58,7 +58,9 @@
     el-tree(
       :data="structs"
       show-checkbox
-      node-key="label"
+      node-key="id"
+      :props="treeProps"
+      :default-checked-keys="authArr"
       ref="structTree"
     )
     .end-time
@@ -87,6 +89,15 @@ import draggable from 'vuedraggable'
 import FormItem from './components/formItem'
 import WidgetSet from './components/param'
 import MyAvatar from '@/components/Avatar'
+
+import { getLoginUser } from '@/utils/storage.js'
+
+import {
+  addFormAPI,
+  getFormDetailAPI,
+  updateFormAPI,
+  getContactsAPI
+} from '@/api/index.js'
 
 export default {
   components: {
@@ -170,13 +181,17 @@ export default {
       },
       currentSelect: -1,
       publishVisiable: false,
-      structs: [
-        { label: '杭州国际服务工程学院' }, { label: '阿里巴巴商学院' }, { label: '理学院' }, { label: '后勤部门' }, { label: '教务处' },
-        { label: '杭州国际服务工程学院2' }, { label: '阿里巴巴商学院2' }, { label: '理学院2' }, { label: '后勤部门2' }, { label: '教务处2' },
-        { label: '杭州国际服务工程学院3' }, { label: '阿里巴巴商学院3' }, { label: '理学院3' }, { label: '后勤部门3' }, { label: '教务处3' },
-        { label: '杭州国际服务工程学院4' }, { label: '阿里巴巴商学院4' }, { label: '理学院4' }, { label: '后勤部门4' }, { label: '教务处4' }
-      ],
-      endTime: ''
+      structs: [], // 发布给组织
+      endTime: 946656000000,
+      formName: '未命名表单',
+      formId: -1,
+      treeProps: {
+        label: function (data, node) {
+          console.log(data, node)
+          return data.groupName
+        }
+      },
+      authArr: []
     }
   },
   computed: {
@@ -184,11 +199,45 @@ export default {
       let resArr = this.formData.filter(_ => _.widget && _.widget.id === this.currentSelect)
       if (resArr.length) return resArr[0]
       return null
+    },
+    mode () {
+      return this.$route.name
+    },
+    saveParams () {
+      let { phone } = getLoginUser()
+      let agId = this.mode === 'addForm' ? '0' : this.$route.params.groupId
+      let endTime = +new Date(this.endTime)
+      let p = {
+        appId: this.$route.params.appId,
+        creator: phone,
+        agId,
+        data: JSON.stringify(this.formData),
+        endTime,
+        type: 1,
+        name: this.formName,
+        authArr: this.authArr.join(',')
+      }
+      if (this.mode === 'editForm') {
+        p.id = this.$route.params.formId
+      }
+      return p
     }
+  },
+  mounted () {
+    this.initFormData()
   },
   methods: {
     goback () {
-      this.$router.push({ name: 'editApp', params: { id: 1 } })
+      this.$router.push({ name: 'editApp', params: { id: this.$route.params.appId } })
+    },
+    async initFormData () {
+      let contacts = await getContactsAPI()
+      this.structs = contacts.data
+      if (this.$route.params.formId) {
+        let id = this.$route.params.formId
+        let formDetail = await getFormDetailAPI(id)
+        this.flushFormData(formDetail)
+      }
     },
     rename () {
       this.$prompt('修改名称', {
@@ -201,6 +250,7 @@ export default {
         inputPlaceholder: '',
         inputErrorMessage: '表单名称不能为空'
       }).then(({ value }) => {
+        this.formName = value
         this.$message({
           type: 'success',
           message: '修改成功'
@@ -211,6 +261,15 @@ export default {
           message: '取消修改'
         })
       })
+    },
+    async saveForm () {
+      if (this.mode === 'addForm') {
+        let saveRes = await addFormAPI(this.saveParams)
+        this.flushFormData(saveRes)
+      } else if (this.mode === 'editForm') {
+        let saveRes = await updateFormAPI(this.saveParams)
+        this.flushFormData(saveRes)
+      }
     },
     handleCloneWidget (e) {
       const target = /simple/.test(e.target.className) ? this.baseWidget : this.complexWidget
@@ -294,11 +353,7 @@ export default {
       this.$router.push({ name: 'formData', param: { appId: 1, formId: 2 } })
     },
     handleClosePublish (done) {
-      let el = this.$refs.structTree
-      let structs = el.getCheckedKeys()
-      el.setCheckedNodes(structs)
       done()
-      this.endTime = ''
     },
     handleCancelPublish () {
       let el = this.$refs.structTree
@@ -307,16 +362,24 @@ export default {
       this.publishVisiable = false
       this.endTime = ''
     },
-    handleConfirmPublish () {
+    async handleConfirmPublish () {
       let el = this.$refs.structTree
-      let structs = el.getCheckedKeys()
-      el.setCheckedNodes(structs)
+      this.authArr = el.getCheckedKeys()
+      if (this.mode === 'addForm') {
+        let saveRes = await addFormAPI(this.saveParams)
+        this.flushFormData(saveRes)
+      } else {
+        let updateRes = await updateFormAPI(this.saveParams)
+        this.flushFormData(updateRes)
+      }
       this.publishVisiable = false
-      this.endTime = ''
-      this.$message({
-        message: '发布成功',
-        type: 'success'
-      })
+    },
+    flushFormData ({ data }) {
+      this.formName = data.name
+      this.formId = data.id
+      this.endTime = data.endTime
+      this.authArr = data.authArr.split(',')
+      this.formData = JSON.parse(data.data)
     }
   }
 }

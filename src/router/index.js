@@ -44,8 +44,13 @@ export const publicRouters = [
     component: EditApp
   },
   {
-    path: '/edit/form/:appId/:formId',
+    path: '/edit/form/:appId/:groupId/:formId',
     name: 'editForm',
+    component: EditForm
+  },
+  {
+    path: '/add/form/:appId',
+    name: 'addForm',
     component: EditForm
   },
   {

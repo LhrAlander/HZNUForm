@@ -17,5 +17,12 @@ export const deleteMemberAPI = params => request.post(`${HOST}/deleteMember`, pa
 export const addAppAPI = params => request.post(`${HOST}/addApp`, params)
 export const getAppsAPI = phone => request.get(`${HOST}/apps?phone=${phone}`)
 export const updateAppAPI = params => request.post(`${HOST}/updateApp`, params)
+export const deleteAppAPI = id => request.get(`${HOST}/deleteApp?id=${id}`)
 export const addAppGroupAPI = params => request.post(`${HOST}/addAppGroup`, params)
 export const updateAppGroupAPI = params => request.post(`${HOST}/updateAppGroup`, params)
+export const deleteAppGroupAPI = id => request.get(`${HOST}/deleteAppGroup?id=${id}`)
+
+export const addFormAPI = params => request.post(`${HOST}/addForm`, params)
+export const getFormDetailAPI = id => request.get(`${HOST}/formDetail?id=${id}`)
+export const updateFormAPI = params => request.post(`${HOST}/updateForm`, params)
+export const deleteFormAPI = id => request.get(`${HOST}/deleteForm?id=${id}`)
