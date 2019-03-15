@@ -350,7 +350,7 @@ export default {
       window.open(href, '_blank')
     },
     goFormData () {
-      this.$router.push({ name: 'formData', param: { appId: 1, formId: 2 } })
+      this.$router.push({ name: 'formData', param: { appId: this.$route.params.appId, groupId: this.$route.params.groupId, formId: this.$route.params.formId } })
     },
     handleClosePublish (done) {
       done()

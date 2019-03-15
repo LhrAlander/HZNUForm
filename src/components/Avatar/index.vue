@@ -13,7 +13,7 @@
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     :visible.sync="teamDialog")
-    .team-item(v-for="t in teams" :key="t" :class="{active:t===team}" @click="changeTeam(t)") {{ t }}
+    .team-item(v-for="t in teams" :key="t.creator" :class="{active:t.creator===team.creator}" @click="changeTeam(t)") {{ t.name }}
   el-dialog(
     title="修改信息"
     :append-to-body="true"
@@ -32,26 +32,44 @@
 </template>
 
 <script>
+import { getLoginUser } from '@/utils/storage.js'
+import {
+  getTeamsAPI,
+  editAPI
+} from '@/api/index.js'
+
 export default {
   data () {
     return {
-      team: '林海瑞',
-      teams: ['林海瑞', '大大大'],
+      team: {},
+      teams: [],
       teamDialog: false,
       infoDialog: false,
-      name: '林海瑞',
-      email: 'AlanderLt@163.com'
+      name: '',
+      email: '',
+      phone: ''
     }
   },
   mounted () {
-    let team = localStorage.getItem('currentTeam')
-    if (team) this.team = team
     this.initInfo()
   },
   methods: {
-    initInfo () {
-      this.name = '林海瑞'
-      this.email = 'AlanderLt@163.com'
+    async initInfo () {
+      let user = getLoginUser()
+      this.name = user.username
+      this.email = user.email
+      this.phone = user.phone
+      let teams = await getTeamsAPI()
+      this.teams.push({
+        creator: this.phone,
+        name: this.name
+      })
+      teams.data.forEach(t => {
+        this.teams.push(t)
+      })
+      let currentTeam = JSON.parse(localStorage.getItem('currentTeam'))
+      this.team = currentTeam || this.teams[0]
+      localStorage.setItem('currentTeam', JSON.stringify(this.team))
     },
     handleCommand (command) {
       if (command === 'team') {
@@ -61,15 +79,22 @@ export default {
       }
     },
     changeTeam (t) {
-      localStorage.setItem('currentTeam', t)
+      localStorage.setItem('currentTeam', JSON.stringify(t))
       this.team = t
       this.teamDialog = false
+      this.$emit('changeTeam')
     },
     cancelChangeInfo () {
       this.infoDialog = false
       this.initInfo()
     },
-    confirmChangeInfo () {
+    async confirmChangeInfo () {
+      let a = {
+        email: this.email || '',
+        phone: this.phone,
+        username: this.name
+      }
+      await editAPI(a)
       this.infoDialog = false
       this.$message({ message: '修改成功', type: 'success' })
     }

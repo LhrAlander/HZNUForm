@@ -10,7 +10,7 @@
       :key="item.router"
       :class="{active: item.router === activeMenu}") {{ item.label }}
     .c-fheader-avatar
-      my-avatar
+      my-avatar(@changeTeam="$emit('changeTeam')")
 </template>
 
 <script>

@@ -4,7 +4,7 @@
     .formdata-head-left
       .formdata-head-left-goback
         i.el-icon-arrow-left(@click="goback")
-        span.app-name 立项表单
+        span.app-name {{ formName }}
     .formdata-head-mid
       .formdata-head-form(@click="goEditForm") 表单设计
       .formdata-head-data 数据管理
@@ -45,6 +45,12 @@
 <script>
 import MyAvatar from '@/components/Avatar'
 
+import {
+  resultListAPI,
+  deleteResultAPI,
+  getFormDetailAPI
+} from '@/api/index.js'
+
 export default {
   components: {
     MyAvatar
@@ -53,21 +59,15 @@ export default {
     return {
       mode: 'mock',
       formData: [],
-      resultData: [
-        {
-          1551435939053: '林海瑞',
-          1551435928781: '13588737694',
-          1551435951602: '杭州国际服务工程学院',
-          'user': '林海瑞',
-          'time': '2019-03-01'
-        }
-      ],
+      resultData: [],
       showColumns: [],
-      selectColumn: false
+      selectColumn: false,
+      formName: ''
     }
   },
   computed: {
     formColumns () {
+      if (!this.formData.length) return []
       return this.formData.map(item => {
         return {
           label: item.label,
@@ -91,37 +91,64 @@ export default {
       ]
       this.showColumns.forEach(id => {
         let column = this.formColumns.find(_ => _.prop === id)
-        let item = {
-          label: column.label,
-          prop: column.prop,
-          width: '150px'
+        if (column) {
+          let item = {
+            label: column.label,
+            prop: column.prop,
+            width: '150px'
+          }
+          if (column.type === 2 || column.type === 5 || column.type === 8) {
+            item.width = '300px'
+          }
+          c.push(item)
         }
-        if (column.type === 2 || column.type === 5 || column.type === 8) {
-          item.width = '300px'
-        }
-        c.push(item)
       })
       return c
     }
   },
   mounted () {
-    if (this.mode === 'mock') {
-      this.formData = JSON.parse(localStorage.getItem('viewForm'))
+    this.initData()
+  },
+  methods: {
+    async initData () {
+      let formDetail = await getFormDetailAPI(this.$route.params.formId)
+      this.formName = formDetail.data.name
+      let resArr = await resultListAPI(this.$route.params.formId)
+      this.flushResData(resArr)
+    },
+    goback () {
+      this.$router.push({ name: 'editApp', param: { id: this.$route.params.appId } })
+    },
+    goEditForm () {
+      this.$router.push({ name: 'editForm', params: { appId: this.$route.params.appId, groupId: this.$route.params.groupId, formId: this.$route.params.formId } })
+    },
+    async deleteData (formData) {
+      let res = await deleteResultAPI(formData.id)
+      console.log(res)
+      this.$message({
+        message: '删除成功',
+        type: 'success'
+      })
+    },
+    flushResData ({ data }) {
+      this.formData = JSON.parse(data.formData)
+      let dataArr = data.resultData.map(result => {
+        let a = {
+          user: result.name,
+          id: result.id,
+          time: new Date(result.updateTime).format('yyyy-MM-dd hh:mm')
+        }
+        let resultData = JSON.parse(result.resultData)
+        resultData.forEach(widget => {
+          a[widget.widget] = widget.value
+        })
+        return a
+      })
+      this.resultData = dataArr
       this.formData.forEach(_ => {
         _.widget.id = _.widget.id + ''
         this.showColumns.push(_.widget.id)
       })
-    }
-  },
-  methods: {
-    goback () {
-      this.$router.push({ name: 'editApp', params: { id: 1 } })
-    },
-    goEditForm () {
-      this.$router.push({ name: 'editForm', params: { appId: 1, formId: 2 } })
-    },
-    deleteData (formData) {
-      console.log(formData)
     }
   }
 }

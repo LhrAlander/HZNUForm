@@ -1,6 +1,6 @@
 <template lang="pug">
 .apps
-  f-header
+  f-header(@changeTeam="handleChangeTeam")
   .apps-wrapper
     .app-item(v-for="app in apps" :key="app.appId" :data-name="app.name" @click="goApp(app)")
       .app-item-bar(:style="{ background: app.color }")
@@ -41,7 +41,7 @@ import {
   updateAppAPI,
   deleteAppAPI
 } from '@/api/index.js'
-import { getLoginUser, saveAppInfo } from '@/utils/storage.js'
+import { getLoginUser, saveAppInfo, getItem } from '@/utils/storage.js'
 
 export default {
   components: {
@@ -62,9 +62,13 @@ export default {
   },
   methods: {
     async getApps () {
-      let { phone } = getLoginUser()
-      let data = await getAppsAPI(phone)
+      let { creator } = getItem('currentTeam')
+      let data = await getAppsAPI(creator)
       this.flushAppList(data)
+    },
+    handleChangeTeam () {
+      console.log('change')
+      this.getApps()
     },
     changeColor (app, color) {
       console.log(app, color)
@@ -135,7 +139,13 @@ export default {
     },
     goApp (app) {
       saveAppInfo(app)
-      this.$router.push({ name: 'editApp', params: { id: app.appId } })
+      let { phone } = getLoginUser()
+      let currentTeam = JSON.parse(localStorage.getItem('currentTeam')).creator
+      if (phone === currentTeam) {
+        this.$router.push({ name: 'editApp', params: { id: app.appId } })
+      } else {
+        this.$router.push({ name: 'viewApp', params: { id: app.appId } })
+      }
     },
     flushAppList ({ data }) {
       this.apps = data

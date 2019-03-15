@@ -2,7 +2,7 @@ function setItem (k, v) {
   localStorage.setItem(k, JSON.stringify(v))
 }
 
-function getItem (k) {
+export function getItem (k) {
   return JSON.parse(localStorage.getItem(k))
 }
 

@@ -8,7 +8,7 @@
     .editapp-head-right
       my-avatar
   .editapp-aside
-    .editapp-aside-operate
+    .editapp-aside-operate(v-if="canCreate")
       .editapp-aside-addgroup(v-if="!changeOrder" @click="handleAddGroup")
         i.iconfont.icon-xinjianfenzu
         |新建分组
@@ -51,11 +51,11 @@
           @click.stop="viewForm(0, form)")
           i.iconfont.icon-biaodan
           |{{ form.formName }}
-          i.edit-icon.el-icon-edit(@click.stop="handleRenameForm(form)")
-          i.edit-icon.el-icon-delete(@click.stop="handleDeleteForm(form)")
+          i.edit-icon.el-icon-edit(v-if="canCreate" @click.stop="handleRenameForm(form)")
+          i.edit-icon.el-icon-delete(v-if="canCreate" @click.stop="handleDeleteForm(form)")
   .editapp-content
     .editapp-add-wrapper
-      .editapp-add-form(@click="handleCreateForm")
+      .editapp-add-form(v-if="canCreate" @click="handleCreateForm")
         .editapp-add-icon.new-form
         .editapp-add-title 新建表单
         .editapp-add-message 表单可用来搜集数据，适合进行数据上报
@@ -67,14 +67,15 @@
 import draggable from 'vuedraggable'
 import MyAvatar from '@/components/Avatar'
 
-import { getLoginUser } from '@/utils/storage.js'
+import { getItem } from '@/utils/storage.js'
 
 import {
   getAppsAPI,
   addAppGroupAPI,
   updateAppGroupAPI,
   deleteFormAPI,
-  deleteAppGroupAPI
+  deleteAppGroupAPI,
+  moveFormAPI
 } from '@/api/index.js'
 
 export default {
@@ -101,6 +102,9 @@ export default {
         console.log(v)
         this.app.groups.filter(_ => _.groupId === 0)[0].forms = v
       }
+    },
+    canCreate () {
+      return this.$route.name === 'editApp'
     }
   },
   mounted () {
@@ -108,15 +112,19 @@ export default {
   },
   methods: {
     async getCurrentApp () {
-      let { phone } = getLoginUser()
-      let apps = await getAppsAPI(phone)
+      let { creator } = getItem('currentTeam')
+      let apps = await getAppsAPI(creator)
       this.flushAppData(apps)
     },
     goback () {
       this.$router.push({ name: 'app' })
     },
     viewForm (agid, form) {
-      this.$router.push({ name: 'editForm', params: { appId: this.app.appId, groupId: agid, formId: form.formId } })
+      if (this.canCreate) {
+        this.$router.push({ name: 'editForm', params: { appId: this.app.appId, groupId: agid, formId: form.formId } })
+      } else {
+        this.$router.push({ name: 'submitForm', params: { id: form.formId } })
+      }
     },
     handleDeleteForm (form) {
       this.$confirm('删除将清空数据，且无法还原。', `您确定要删除“${form.formName}”吗?`, {
@@ -250,7 +258,18 @@ export default {
       })
     },
     handleSaveOrder () {
-      this.changeOrder = false
+      let promiseArr = []
+      this.app.groups.forEach(({ groupId, forms }) => {
+        forms.forEach(({ formId }) => {
+          console.log(groupId, formId)
+          promiseArr.push(moveFormAPI({ groupId, formId }))
+        })
+      })
+      Promise.all(promiseArr)
+        .then(res => {
+          console.log('rrr', res)
+          this.changeOrder = false
+        })
     },
     handleCreateForm () {
       this.$router.push({ name: 'addForm', params: { appId: this.$route.params.id } })

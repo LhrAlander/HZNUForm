@@ -65,18 +65,24 @@
             .widget-address-detail
               el-input(placeholder="详细地址" v-model="item.widget.answer.value.detail")
       .form-submit-btn
-        el-button(type="primary" :disabled="mode==='view'") 提交
+        el-button(type="primary" :disabled="!canSubmit" @click="handleSubmitForm") 提交
 </template>
 
 <script>
 import address from '@/assets/js/address'
+import { getLoginUser } from '@/utils/storage.js'
+
+import {
+  formResultAPI,
+  submitFormAPI
+} from '@/api/index.js'
 
 export default {
   data () {
     return {
-      mode: 'view',
       formData: [],
-      answer: []
+      answer: [],
+      formName: ''
     }
   },
   computed: {
@@ -87,11 +93,20 @@ export default {
           value: _.value
         }
       })
+    },
+    canSubmit () {
+      return this.$route.name === 'submitForm'
     }
   },
   created () {
-    if (this.mode === 'view') {
+    if (!this.canSubmit) {
       this.formData = JSON.parse(localStorage.getItem('viewForm'))
+    } else {
+      let formId = this.$route.params.id
+      formResultAPI(formId)
+        .then(res => {
+          this.flushFormRes(res)
+        })
     }
     this.initAnswer()
   },
@@ -140,6 +155,30 @@ export default {
       if (index === 1) {
         value.city = ''
       }
+    },
+    flushFormRes ({ data }) {
+      this.formName = data.form.name
+      this.formData = JSON.parse(data.form.data)
+      this.initAnswer()
+      if (!data.result) return
+      let answer = JSON.parse(data.result.data)
+      answer.forEach(({ widget, value }) => {
+        let _ = this.answer.find(curr => curr.widget === widget)
+        if (_) {
+          _.value = value
+        }
+      })
+    },
+    async handleSubmitForm () {
+      let { phone } = getLoginUser()
+      let params = {
+        updatetime: +new Date(),
+        phone,
+        data: JSON.stringify(this.answer),
+        formId: this.$route.params.id
+      }
+      let submitRes = await submitFormAPI(params)
+      console.log(submitRes)
     }
   }
 }
