@@ -27,7 +27,7 @@
                 v-for="(op, index) in item.widget.items"
                 :key="index"
                 :label="op.label"
-                :value="op.value")
+                :value="op.label")
           .widget-date(v-if="item.widget.type === 7")
             el-date-picker(
               v-model="item.widget.answer.value"
@@ -44,7 +44,7 @@
                     v-for="(province, index) in provinces"
                     :key="index"
                     :label="province.label"
-                    :value="province.value")
+                    :value="province.label")
               .address-select-item.city
                 el-select(
                   placeholder="市"
@@ -54,14 +54,14 @@
                     v-for="(city, index) in getCities(item.widget.answer.value.province)"
                     :key="index"
                     :label="city.label"
-                    :value="city.value")
+                    :value="city.label")
               .address-select-item.town
                 el-select(placeholder="区/县" v-model="item.widget.answer.value.town")
                   el-option(
                     v-for="(town, index) in getTowns(item.widget.answer.value)"
                     :key="index"
                     :label="town.label"
-                    :value="town.value")
+                    :value="town.label")
             .widget-address-detail
               el-input(placeholder="详细地址" v-model="item.widget.answer.value.detail")
       .form-submit-btn

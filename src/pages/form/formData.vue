@@ -13,7 +13,7 @@
   .formdata-cnt
     .formdata-operate
       el-button(type="success" @click="selectColumn=true") 显示字段
-      el-button(type="primary") 导出excel
+      el-button(type="primary" @click="exportData") 导出excel
       .formdata-search
         el-input(prefix-icon="el-icon-search" placeholder="搜索填写人手机号/邮箱")
     .formdata-table
@@ -44,6 +44,7 @@
 
 <script>
 import MyAvatar from '@/components/Avatar'
+import { exportExcel } from '@/utils/index.js'
 
 import {
   resultListAPI,
@@ -116,8 +117,25 @@ export default {
       let resArr = await resultListAPI(this.$route.params.formId)
       this.flushResData(resArr)
     },
+    exportData () {
+      let idMap = {user: '提交人', time: '提交时间'}
+      this.formData.forEach(({ widget, label }) => {
+        idMap[widget.id] = label
+      })
+      let data = this.resultData.map(_ => {
+        let row = {}
+        for (let k in _) {
+          if (k === 'id') continue
+          let label = idMap[k]
+          let value = _[k]
+          row[label] = value
+        }
+        return row
+      })
+      exportExcel(data, this.formName)
+    },
     goback () {
-      this.$router.push({ name: 'editApp', param: { id: this.$route.params.appId } })
+      this.$router.push({ name: 'editApp', params: { id: this.$route.params.appId } })
     },
     goEditForm () {
       this.$router.push({ name: 'editForm', params: { appId: this.$route.params.appId, groupId: this.$route.params.groupId, formId: this.$route.params.formId } })
