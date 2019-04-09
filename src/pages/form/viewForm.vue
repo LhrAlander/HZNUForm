@@ -178,6 +178,7 @@ export default {
         formId: this.$route.params.id
       }
       let submitRes = await submitFormAPI(params)
+      this.$router.push({ name: 'app' })
       console.log(submitRes)
     }
   }

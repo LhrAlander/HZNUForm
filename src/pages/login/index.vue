@@ -71,7 +71,6 @@ export default {
         }
         let loginRes = await loginAPI(user)
         const userInfo = loginRes.data
-        delete userInfo.password
         saveLoginInfo(userInfo)
         this.$router.push({ name: 'contact' })
       } catch (error) {

@@ -87,7 +87,7 @@ let router = new Router({
 })
 router.beforeEach((to, from, next) => {
   let user = getLoginUser()
-  if (!user && to.name !== 'login') {
+  if (!user && to.name !== 'login' && to.name !== 'reg') {
     Message('请先登录')
     return next('/login')
   }

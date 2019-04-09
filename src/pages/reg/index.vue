@@ -28,6 +28,7 @@
 
 <script>
 import { regAPI } from '@/api/index'
+import { saveLoginInfo } from '@/utils/storage.js'
 
 export default {
   data () {
@@ -72,7 +73,9 @@ export default {
           phone: this.regForm.phone,
           username: this.regForm.name
         }
-        let regRes = await regAPI(user)
+        let userInfo = await regAPI(user)
+        saveLoginInfo(userInfo)
+        this.$router.push({ name: 'contact' })
         console.log(regRes)
       } catch (error) {
         console.log(error)

@@ -251,10 +251,6 @@ export default {
         inputErrorMessage: '表单名称不能为空'
       }).then(({ value }) => {
         this.formName = value
-        this.$message({
-          type: 'success',
-          message: '修改成功'
-        })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -373,6 +369,7 @@ export default {
         this.flushFormData(updateRes)
       }
       this.publishVisiable = false
+      this.goback()
     },
     flushFormData ({ data }) {
       this.formName = data.name
