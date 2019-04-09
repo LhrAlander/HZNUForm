@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-const HOST = 'http://192.168.1.126:8082/form'
+const HOST = 'http://172.18.53.199:8082/form'
 
 export const loginAPI = user => request.post(`${HOST}/login`, user)
 export const regAPI = user => request.post(`${HOST}/register`, user)

@@ -28,7 +28,7 @@
             template(slot="title")
               i.iconfont.icon-wenjianjia
               |{{ group.name }}
-            .editapp-group-operate
+            .editapp-group-operate(v-if="canCreate")
               .editapp-group-rename(@click="handleRenameGroup(group)")
                 i.el-icon-edit
                 |修改名称
@@ -42,8 +42,8 @@
                 @click="viewForm(group.groupId, form)")
                 i.iconfont.icon-biaodan
                 |{{ form.formName }}
-                i.edit-icon.el-icon-edit(@click.stop="handleRenameForm(form)")
-                i.edit-icon.el-icon-delete(@click.stop="handleDeleteForm(form)")
+                i.edit-icon.el-icon-edit(@click.stop="handleRenameForm(form)" v-if="canCreate")
+                i.edit-icon.el-icon-delete(@click.stop="handleDeleteForm(form)" v-if="canCreate")
       draggable(v-model="unGroupForms"  @start="drag=true" @end="drag=false" :options="{ group:'forms', disabled: !changeOrder }")
         .editapp-ungroup-form(
           v-for="form in unGroupForms"

@@ -2,6 +2,10 @@ function setItem (k, v) {
   localStorage.setItem(k, JSON.stringify(v))
 }
 
+function removeItem (k) {
+  localStorage.removeItem(k)
+}
+
 export function getItem (k) {
   return JSON.parse(localStorage.getItem(k))
 }
@@ -20,4 +24,8 @@ export const saveAppInfo = app => {
 
 export const getAppInfo = () => {
   return getItem('app')
+}
+
+export const logout = () => {
+  removeItem('user')
 }

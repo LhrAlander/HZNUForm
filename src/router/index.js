@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+import { Message } from 'element-ui'
+import { getLoginUser } from '@/utils/storage.js'
+
 const Login = () => import('@/pages/login')
 const Reg = () => import('@/pages/reg')
 const Contact = () => import('@/pages/contact')
@@ -79,6 +82,20 @@ export const publicRouters = [
   }
 ]
 
-export default new Router({
+let router = new Router({
   routes: publicRouters
 })
+router.beforeEach((to, from, next) => {
+  let user = getLoginUser()
+  if (!user && to.name !== 'login') {
+    Message('请先登录')
+    return next('/login')
+  }
+  if (user && to.name === 'login') {
+    Message('您已登录')
+    return next('/contact')
+  }
+  next()
+})
+
+export default router

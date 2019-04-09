@@ -5,6 +5,7 @@
     el-dropdown-menu(slot="dropdown")
       el-dropdown-item(command="team") 切换团队
       el-dropdown-item(command="info") 修改信息
+      el-dropdown-item(command="logout") 退出系统
   el-dialog(
     title="选择团队"
     width="300px"
@@ -32,7 +33,7 @@
 </template>
 
 <script>
-import { getLoginUser } from '@/utils/storage.js'
+import { getLoginUser, logout } from '@/utils/storage.js'
 import {
   getTeamsAPI,
   editAPI
@@ -74,6 +75,9 @@ export default {
     handleCommand (command) {
       if (command === 'team') {
         this.teamDialog = true
+      } else if (command === 'logout') {
+        logout()
+        this.$router.push({ name: 'login' })
       } else {
         this.infoDialog = true
       }

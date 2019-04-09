@@ -25,6 +25,7 @@
           :key="c.prop"
           :prop="c.prop"
           :label="c.label"
+          :formatter="resultFormatter"
           :min-width="c.width")
         el-table-column(
           fixed="right"
@@ -136,6 +137,16 @@ export default {
     },
     goback () {
       this.$router.push({ name: 'editApp', params: { id: this.$route.params.appId } })
+    },
+    resultFormatter (r, c, cv) {
+      if (cv === null || cv === undefined) return ''
+      if (typeof cv === 'string') return cv
+      const keys = Object.keys(cv)
+      const values = []
+      keys.forEach(k => {
+        values.push(cv[k])
+      })
+      return values.join('')
     },
     goEditForm () {
       this.$router.push({ name: 'editForm', params: { appId: this.$route.params.appId, groupId: this.$route.params.groupId, formId: this.$route.params.formId } })

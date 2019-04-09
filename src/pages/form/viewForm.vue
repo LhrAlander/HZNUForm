@@ -2,7 +2,7 @@
 .finalform
   .final-form-card
     .form-card-head
-    .form-card-title 2019年清明节离校登记表
+    .form-card-title {{ formName }}
     .card-widget-wrapper
       .final-form-widget(v-for="item in formData" :key="item.widget.id")
         .form-widget-label {{ item.label }}
@@ -187,6 +187,7 @@ export default {
 <style lang="scss">
 .finalform {
   padding: 20px;
+  background: #d9e0e7;
   .final-form-card {
     width: 780px;
     margin: 0 auto;
