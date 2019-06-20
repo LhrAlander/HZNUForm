@@ -34,4 +34,4 @@
 > 为学生所拥有的功能。
 > 暂时只提供所有的基础功能
 
-[点击这里]('https://www.facebook.com/profile.php?id=100011234947923') 
+[点击这里](https://www.facebook.com/profile.php?id=100011234947923) 
