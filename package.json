@@ -14,7 +14,7 @@
     "axios": "^0.18.0",
     "element-ui": "^2.4.8",
     "normalize.css": "^8.0.0",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "pug-loader": "^2.4.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
